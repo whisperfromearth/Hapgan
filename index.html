@@ -3,707 +3,446 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>합간 — 합주를 간단히</title>
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/sucrase@3.35.0/dist/umd/sucrase.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <title>합간</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #0a0a0a; color: #e8e8e8; font-family: "Courier New", monospace; -webkit-text-size-adjust: 100%; }
-    input, button { font-family: "Courier New", monospace; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#0a0a0a;color:#e8e8e8;font-family:'Courier New',monospace;min-height:100vh}
+    #root{max-width:480px;margin:0 auto;padding:28px 20px 60px}
+    input,button{font-family:'Courier New',monospace}
+    .btn{width:100%;padding:14px;margin-top:10px;background:#7c6af7;border:none;border-radius:12px;cursor:pointer;color:#fff;font-size:12px;letter-spacing:.2em;text-transform:uppercase}
+    .btn:disabled{background:#1a1a1a;border:1px solid #2a2a2a;color:#333;cursor:default}
+    .input{width:100%;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:12px 14px;color:#e8e8e8;font-size:13px;outline:none}
+    .card{background:#111;border:1px solid #1e1e1e;border-radius:14px;padding:18px 20px;margin-bottom:12px}
+    .label{font-size:10px;color:#555;letter-spacing:.25em;text-transform:uppercase;margin-bottom:6px;display:block}
+    .tabs{display:flex;border-bottom:1px solid #1e1e1e;margin-bottom:24px}
+    .tab{flex:1;background:none;border:none;border-bottom:2px solid transparent;padding:8px 0 12px;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#333;cursor:pointer}
+    .tab.on{color:#7c6af7;border-bottom-color:#7c6af7}
+    .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+    .role-btn{padding:12px 0;border-radius:10px;border:1px solid #2a2a2a;background:#1a1a1a;color:#555;cursor:pointer;font-size:12px}
+    .role-btn.on{border-color:#7c6af7;background:#7c6af722;color:#7c6af7}
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+    .cal-day{aspect-ratio:1;border-radius:8px;border:none;background:transparent;color:#e8e8e8;cursor:pointer;font-size:12px}
+    .cal-day.sel{background:#7c6af7;color:#fff;font-weight:bold}
+    .cal-day.past{color:#222;cursor:default}
+    .cal-day.sun{color:#f87171}.cal-day.sat{color:#9b8ff7}
+    .status-row{display:flex;gap:8px;margin-top:12px}
+    .status-btn{flex:1;padding:9px 0;border-radius:8px;border:1px solid #2a2a2a;background:#1a1a1a;color:#444;cursor:pointer;font-size:11px}
+    .modal-bg{position:fixed;inset:0;background:#000c;z-index:100;display:flex;align-items:flex-end}
+    .modal{background:#111;border-radius:20px 20px 0 0;padding:28px 24px 48px;width:100%;border:1px solid #222}
+    .dur-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+    .dur-btn{padding:7px 14px;border-radius:8px;border:1px solid #2a2a2a;background:#1a1a1a;color:#444;cursor:pointer;font-size:12px}
+    .dur-btn.on{border-color:#7c6af7;background:#7c6af722;color:#7c6af7}
+    .err{font-size:11px;color:#f87171;margin:8px 0}
+    .logo span:first-child{color:#7c6af7}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .spinner{width:28px;height:28px;border:2px solid #1e1e1e;border-top-color:#7c6af7;border-radius:50%;animation:spin .8s linear infinite;margin:80px auto}
   </style>
 </head>
 <body>
-  <div id="root"></div>
-  <script id="app-code" type="text/plain">
-
-// ── Supabase ─────────────────────────────────────────────
-const SUPABASE_URL = “https://tjjhkddtfyoyshgtlvsl.supabase.co”;
-const SUPABASE_KEY = “sb_publishable_Ciw2l65MsJJdH0dx_DdHbQ_BG1F0I8P”;
-
-async function sb(path, opts = {}) {
-const { method=“GET”, body, prefer } = opts;
-const headers = {
-“apikey”: SUPABASE_KEY,
-“Authorization”: `Bearer ${SUPABASE_KEY}`,
-“Content-Type”: “application/json”,
-“Accept”: “application/json”,
-};
-if (prefer || method !== “GET”) {
-headers[“Prefer”] = prefer || “return=representation”;
-}
-const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-method, headers,
-…(body ? { body } : {}),
-});
-if (!res.ok) {
-const err = await res.text();
-throw new Error(`${res.status}: ${err}`);
-}
-const text = await res.text();
-return text ? JSON.parse(text) : null;
+<div id="root"></div>
+<script>
+// ── Supabase
+const SB_URL = "https://tjjhkddtfyoyshgtlvsl.supabase.co";
+const SB_KEY = "sb_publishable_Ciw2l65MsJJdH0dx_DdHbQ_BG1F0I8P";
+async function sb(path, o={}) {
+  const h = {"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json","Accept":"application/json"};
+  if(o.prefer||o.method) h["Prefer"]=o.prefer||"return=representation";
+  const r = await fetch(SB_URL+"/rest/v1/"+path,{method:o.method||"GET",headers:h,body:o.body});
+  if(!r.ok) throw new Error((await r.text()));
+  const t=await r.text(); return t?JSON.parse(t):null;
 }
 
-function genRoomId() {
-return Math.random().toString(36).slice(2, 8).toUpperCase();
+// ── 상수
+const ROLES=[“보컬”,“기타”,“베이스”,“드럼”,“키보드”,“세션”,“기타(other)”];
+const EMO={“보컬”:“🎤”,“기타”:“🎸”,“베이스”:“🎵”,“드럼”:“🥁”,“키보드”:“🎹”,“세션”:“🎙️”,“기타(other)”:“🎶”};
+const DAYS=[“일”,“월”,“화”,“수”,“목”,“금”,“토”];
+const MONTHS=[“1월”,“2월”,“3월”,“4월”,“5월”,“6월”,“7월”,“8월”,“9월”,“10월”,“11월”,“12월”];
+const SC={“ok”:”#4ade80”,“maybe”:”#facc15”,“no”:”#f87171”};
+const SL={“ok”:“됨”,“maybe”:“애매”,“no”:“안됨”};
+const DURS=[1,1.5,2,2.5,3,3.5,4];
+
+function pad(n){return String(n).padStart(2,“0”)}
+function dkey(d){return d.y+”-”+d.m+”-”+d.d}
+function fmtDate(y,m,d){return (m+1)+“월 “+d+“일 (”+DAYS[new Date(y,m,d).getDay()]+”)”}
+function fmtTime(t){
+if(!t) return “시간 미정”;
+const em=t.h*60+parseInt(t.m)+t.dur*60;
+return pad(t.h)+”:”+t.m+” → “+pad(Math.floor(em/60)%24)+”:”+pad(em%60)+” (”+t.dur+“시간)”;
 }
+function genId(){return Math.random().toString(36).slice(2,8).toUpperCase()}
 
-// ── 상수 ─────────────────────────────────────────────────
-const ROLES = [“보컬”, “기타”, “베이스”, “드럼”, “키보드”, “세션”, “기타(other)”];
-const ROLE_EMOJI = { “보컬”:“🎤”,“기타”:“🎸”,“베이스”:“🎵”,“드럼”:“🥁”,“키보드”:“🎹”,“세션”:“🎙️”,“기타(other)”:“🎶” };
-const STATUS = { ok: “됨”, maybe: “애매”, no: “안됨” };
-const STATUS_COLOR = { ok: “#4ade80”, maybe: “#facc15”, no: “#f87171” };
-const DAYS = [“일”,“월”,“화”,“수”,“목”,“금”,“토”];
-const MONTHS = [“1월”,“2월”,“3월”,“4월”,“5월”,“6월”,“7월”,“8월”,“9월”,“10월”,“11월”,“12월”];
-const HOURS = Array.from({length:16},(_,i)=>i+8); // 8~23
-const MINUTES = [“00”,“15”,“30”,“45”];
-const DURATIONS = [1, 1.5, 2, 2.5, 3, 3.5, 4];
-
-function getDaysInMonth(y,m){ return new Date(y,m+1,0).getDate(); }
-function getFirstDay(y,m){ return new Date(y,m,1).getDay(); }
-function formatDate(y,m,d){ return `${m+1}월 ${d}일 (${DAYS[new Date(y,m,d).getDay()]})`; }
-function dateKey(d){ return `${d.year}-${d.month}-${d.day}`; }
-
-const S = {
-card: { background:”#111”, border:“1px solid #1e1e1e”, borderRadius:14, padding:“18px 20px”, marginBottom:12 },
-label: { fontSize:10, color:”#555”, letterSpacing:“0.25em”, textTransform:“uppercase”, marginBottom:6, display:“block” },
-input: { width:“100%”, background:”#1a1a1a”, border:“1px solid #2a2a2a”, borderRadius:10, padding:“12px 14px”, color:”#e8e8e8”, fontSize:13, fontFamily:”‘Courier New’, monospace”, outline:“none”, boxSizing:“border-box” },
-btn: (active=true, color=”#7c6af7”) => ({
-width:“100%”, padding:“14px”, marginTop:10,
-background: active ? color : “#1a1a1a”,
-border: active ? “none” : “1px solid #2a2a2a”,
-borderRadius:12, cursor: active ? “pointer” : “default”,
-color: active ? “#fff” : “#333”,
-fontSize:12, letterSpacing:“0.2em”, textTransform:“uppercase”,
-fontFamily:”‘Courier New’, monospace”, transition:“all 0.2s”,
-}),
+// ── 상태
+let state = {
+screen:“landing”, loading:false, error:null,
+bandName:””, sessionTitle:””, setupStep:“info”,
+selDates:[], dtMap:{}, timeModalDate:null, roomId:null,
+loginStep:“name”, myName:””, myRole:””,
+dates:[], votes:{}, myVotes:{}, confirmed:null,
+view:“vote”, roomInfo:null, inviteCopied:false, submitted:false,
+timeHour:14, timeMin:“00”, timeDur:2,
 };
 
-// ── 휠 피커 ──────────────────────────────────────────────
-function WheelPicker({ items, selected, onSelect, width=80 }) {
-const ITEM_H = 40;
-const ref = useRef(null);
-const idx = items.indexOf(selected);
+function set(patch){state={…state,…patch};render()}
 
-useEffect(() => {
-if (ref.current) ref.current.scrollTop = idx * ITEM_H;
-}, []);
+// 초기화: URL 해시 확인
+const hash=location.hash.replace(”#”,””);
+if(hash){state.roomId=hash;state.screen=“login”;}
 
-const handleScroll = useCallback(() => {
-if (!ref.current) return;
-const i = Math.round(ref.current.scrollTop / ITEM_H);
-const c = Math.max(0, Math.min(items.length-1, i));
-if (items[c] !== selected) onSelect(items[c]);
-}, [items, selected, onSelect]);
-
-return (
-<div style={{ position:“relative”, width, height:ITEM_H*5, overflow:“hidden” }}>
-<div style={{ position:“absolute”, top:ITEM_H*2, left:0, right:0, height:ITEM_H, background:”#7c6af722”, borderTop:“1px solid #7c6af755”, borderBottom:“1px solid #7c6af755”, pointerEvents:“none”, zIndex:2, borderRadius:8 }}/>
-<div style={{ position:“absolute”, top:0, left:0, right:0, height:ITEM_H*2, background:“linear-gradient(to bottom, #111, transparent)”, pointerEvents:“none”, zIndex:3 }}/>
-<div style={{ position:“absolute”, bottom:0, left:0, right:0, height:ITEM_H*2, background:“linear-gradient(to top, #111, transparent)”, pointerEvents:“none”, zIndex:3 }}/>
-<div ref={ref} onScroll={handleScroll} style={{ height:“100%”, overflowY:“scroll”, scrollSnapType:“y mandatory”, scrollbarWidth:“none” }}>
-<style>{`div::-webkit-scrollbar{display:none}`}</style>
-{[…Array(2)].map((*,i)=><div key={`a${i}`} style={{height:ITEM_H}}/>)}
-{items.map((item,i)=>(
-<div key={String(item)} onClick={()=>{ onSelect(item); ref.current.scrollTop=i*ITEM_H; }} style={{ height:ITEM_H, display:“flex”, alignItems:“center”, justifyContent:“center”, scrollSnapAlign:“start”, cursor:“pointer”, fontSize:15, fontFamily:”‘Courier New’, monospace”, color:item===selected?”#e8e8e8”:”#444”, fontWeight:item===selected?“bold”:“normal” }}>
-{item}
-</div>
-))}
-{[…Array(2)].map((*,i)=><div key={`b${i}`} style={{height:ITEM_H}}/>)}
-</div>
-</div>
-);
-}
-
-function TimeWheelModal({ dateLabel, initial, onConfirm, onClose }) {
-const [h, setH] = useState(initial?.hour ?? 14);
-const [m, setM] = useState(initial?.minute ?? “00”);
-const [dur, setDur] = useState(initial?.duration ?? 2);
-
-const endH = Math.floor(h + dur + parseInt(m)/60);
-const endM = Math.round(((h + dur + parseInt(m)/60) - Math.floor(h + dur + parseInt(m)/60)) * 60);
-const endStr = `${String(endH % 24).padStart(2,"0")}:${String(endM).padStart(2,"0")}`;
-const display = `${String(h).padStart(2,"0")}:${m} → ${endStr}`;
-
-return (
-<div style={{ position:“fixed”, inset:0, background:”#000000dd”, zIndex:200, display:“flex”, alignItems:“flex-end” }} onClick={onClose}>
-<div onClick={e=>e.stopPropagation()} style={{ background:”#111”, borderRadius:“20px 20px 0 0”, padding:“28px 24px 40px”, width:“100%”, maxWidth:480, margin:“0 auto”, border:“1px solid #222” }}>
-<div style={{ fontSize:11, color:”#555”, marginBottom:4 }}>{dateLabel}</div>
-<div style={{ fontSize:16, fontWeight:“bold”, marginBottom:20 }}>시간 설정</div>
-
-```
-    {/* 시작 시간 */}
-    <div style={{ fontSize:10, color:"#555", letterSpacing:"0.2em", marginBottom:10 }}>시작 시간</div>
-    <div style={{ display:"flex", justifyContent:"center", alignItems:"center", gap:8, marginBottom:20 }}>
-      <WheelPicker items={HOURS} selected={h} onSelect={setH} width={72}/>
-      <div style={{ fontSize:20, color:"#333" }}>:</div>
-      <WheelPicker items={MINUTES} selected={m} onSelect={setM} width={72}/>
-    </div>
-
-    {/* 합주 시간 */}
-    <div style={{ fontSize:10, color:"#555", letterSpacing:"0.2em", marginBottom:10 }}>합주 시간</div>
-    <div style={{ display:"flex", gap:6, flexWrap:"wrap", marginBottom:20 }}>
-      {DURATIONS.map(d=>(
-        <button key={d} onClick={()=>setDur(d)} style={{
-          padding:"7px 12px", borderRadius:8, cursor:"pointer", fontSize:12,
-          border: dur===d ? "1px solid #7c6af7" : "1px solid #2a2a2a",
-          background: dur===d ? "#7c6af722" : "#1a1a1a",
-          color: dur===d ? "#7c6af7" : "#444",
-          fontFamily:"'Courier New', monospace",
-        }}>{d}시간</button>
-      ))}
-    </div>
-
-    {/* 미리보기 */}
-    <div style={{ background:"#1a1a1a", borderRadius:10, padding:"12px 16px", textAlign:"center", marginBottom:20 }}>
-      <div style={{ fontSize:11, color:"#555", marginBottom:4 }}>합주 시간</div>
-      <div style={{ fontSize:18, fontWeight:"bold", color:"#e8e8e8", letterSpacing:"0.05em" }}>{display}</div>
-      <div style={{ fontSize:11, color:"#7c6af7", marginTop:4 }}>{dur}시간</div>
-    </div>
-
-    <button onClick={()=>onConfirm(h,m,dur)} style={{...S.btn(), marginTop:0}}>확인</button>
-  </div>
-</div>
-```
-
-);
-}
-
-function Calendar({ selectedDates, onToggle }) {
-const today = new Date();
-const [calYear, setCalYear] = useState(today.getFullYear());
-const [calMonth, setCalMonth] = useState(today.getMonth());
-const daysInMonth = getDaysInMonth(calYear, calMonth);
-const firstDay = getFirstDay(calYear, calMonth);
-const cells = […Array(firstDay).fill(null), …Array.from({length:daysInMonth},(_,i)=>i+1)];
-const isSelected = day => day && selectedDates.some(d=>d.year===calYear&&d.month===calMonth&&d.day===day);
-const isPast = day => {
-if (!day) return false;
-const d = new Date(calYear,calMonth,day); d.setHours(0,0,0,0);
-const t = new Date(); t.setHours(0,0,0,0);
-return d < t;
-};
-return (
-<div>
-<div style={{ display:“flex”, justifyContent:“space-between”, alignItems:“center”, marginBottom:16 }}>
-<button onClick={()=>{ if(calMonth===0){setCalMonth(11);setCalYear(y=>y-1);}else setCalMonth(m=>m-1); }} style={{ background:“none”, border:“none”, color:”#555”, cursor:“pointer”, fontSize:20, padding:“4px 10px” }}>‹</button>
-<span style={{ fontSize:14, fontWeight:“bold” }}>{calYear}년 {MONTHS[calMonth]}</span>
-<button onClick={()=>{ if(calMonth===11){setCalMonth(0);setCalYear(y=>y+1);}else setCalMonth(m=>m+1); }} style={{ background:“none”, border:“none”, color:”#555”, cursor:“pointer”, fontSize:20, padding:“4px 10px” }}>›</button>
-</div>
-<div style={{ display:“grid”, gridTemplateColumns:“repeat(7,1fr)”, gap:2, marginBottom:4 }}>
-{DAYS.map((d,i)=><div key={d} style={{ textAlign:“center”, fontSize:10, color:i===0?”#f87171”:i===6?”#9b8ff7”:”#444”, padding:“4px 0” }}>{d}</div>)}
-</div>
-<div style={{ display:“grid”, gridTemplateColumns:“repeat(7,1fr)”, gap:2 }}>
-{cells.map((day,i)=>{
-const past=isPast(day); const sel=isSelected(day); const dow=i%7;
-return <button key={i} onClick={()=>!past&&day&&onToggle({year:calYear,month:calMonth,day})} style={{ aspectRatio:“1”, borderRadius:8, border:“none”, background:sel?”#7c6af7”:“transparent”, color:!day||past?”#222”:sel?”#fff”:dow===0?”#f87171”:dow===6?”#9b8ff7”:”#e8e8e8”, cursor:!day||past?“default”:“pointer”, fontSize:12, fontFamily:”‘Courier New’, monospace”, fontWeight:sel?“bold”:“normal” }}>{day||””}</button>;
-})}
-</div>
-</div>
-);
-}
-
-// ── 로딩 스피너 ──────────────────────────────────────────
-function Spinner() {
-return (
-<div style={{ display:“flex”, flexDirection:“column”, alignItems:“center”, justifyContent:“center”, minHeight:“60vh”, gap:16 }}>
-<div style={{ width:32, height:32, border:“2px solid #1e1e1e”, borderTop:“2px solid #7c6af7”, borderRadius:“50%”, animation:“spin 0.8s linear infinite” }}/>
-<style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-<span style={{ fontSize:11, color:”#444”, letterSpacing:“0.2em” }}>로딩중…</span>
-</div>
-);
-}
-
-// ── 메인 ─────────────────────────────────────────────────
-function Hapgan() {
-const [screen, setScreen] = useState(“landing”);
-const [loading, setLoading] = useState(false);
-const [error, setError] = useState(null);
-
-// 방 설정
-const [bandName, setBandName] = useState(””);
-const [sessionTitle, setSessionTitle] = useState(””);
-const [selectedDates, setSelectedDates] = useState([]);
-const [dateTimeMap, setDateTimeMap] = useState({});
-const [setupStep, setSetupStep] = useState(“info”);
-const [timeModalDate, setTimeModalDate] = useState(null);
-const [roomId, setRoomId] = useState(null);
-
-// 로그인
-const [loginStep, setLoginStep] = useState(“name”);
-const [myName, setMyName] = useState(””);
-const [myRole, setMyRole] = useState(””);
-
-// 앱 데이터
-const [dates, setDates] = useState([]);
-const [votes, setVotes] = useState({});
-const [myVotes, setMyVotes] = useState({});
-const [confirmed, setConfirmed] = useState(null);
-const [view, setView] = useState(“vote”);
-const [inviteCopied, setInviteCopied] = useState(false);
-const [roomInfo, setRoomInfo] = useState(null);
-const [showInviteModal, setShowInviteModal] = useState(false);
-const [newMemberName, setNewMemberName] = useState(””);
-const [newMemberRole, setNewMemberRole] = useState(””);
-const [submitted, setSubmitted] = useState(false);
-
-// URL에서 roomId 파싱
-useEffect(() => {
-const hash = window.location.hash.replace(”#”,””);
-if (hash) {
-setRoomId(hash);
-setScreen(“login”);
-}
-}, []);
-
-// 방 데이터 로드
-const loadRoom = useCallback(async (rid) => {
-setLoading(true);
-try {
-const [roomData, datesData, votesData] = await Promise.all([
-sb(`rooms?id=eq.${rid}&select=*`),
-sb(`dates?room_id=eq.${rid}&select=*&order=id`),
-sb(`votes?room_id=eq.${rid}&select=*`),
+async function loadRoom(rid){
+set({loading:true,error:null});
+try{
+const [room,ds,vs]=await Promise.all([
+sb(“rooms?id=eq.”+rid+”&select=*”),
+sb(“dates?room_id=eq.”+rid+”&select=*&order=id”),
+sb(“votes?room_id=eq.”+rid+”&select=*”),
 ]);
-if (!roomData?.length) { setError(“방을 찾을 수 없어 😢”); setLoading(false); return; }
-setRoomInfo(roomData[0]);
-setDates(datesData.map(d=>({id:d.id, date:d.date, time:d.time})));
-
-```
-  // votes 재구성: { memberName_dateId: status }
-  const voteMap = {};
-  for (const v of votesData) {
-    if (!voteMap[v.member_name]) voteMap[v.member_name] = {};
-    voteMap[v.member_name][v.date_id] = v.status;
-  }
-  setVotes(voteMap);
-} catch(e) {
-  setError("데이터 로드 실패: " + e.message);
+if(!room||!room.length){set({loading:false,error:“방을 찾을 수 없어 😢”});return;}
+const vm={};
+for(const v of vs){if(!vm[v.member_name])vm[v.member_name]={};vm[v.member_name][v.date_id]=v.status;}
+set({loading:false,roomInfo:room[0],dates:ds.map(d=>({id:d.id,date:d.date,time:d.time})),votes:vm});
+}catch(e){set({loading:false,error:“로드 실패: “+e.message});}
 }
-setLoading(false);
-```
 
-}, []);
-
-// 투표 주기적 갱신 (15초)
-useEffect(() => {
-if (screen !== “app” || !roomId) return;
-const interval = setInterval(() => loadRoom(roomId), 15000);
-return () => clearInterval(interval);
-}, [screen, roomId, loadRoom]);
-
-const toggleDate = d => {
-const k = dateKey(d);
-const exists = selectedDates.find(x=>x.year===d.year&&x.month===d.month&&x.day===d.day);
-if (exists) {
-setDateTimeMap(m=>{ const n={…m}; delete n[k]; return n; });
-setSelectedDates(prev=>prev.filter(x=>!(x.year===d.year&&x.month===d.month&&x.day===d.day)));
-} else {
-setSelectedDates(prev=>[…prev, d]);
-setTimeModalDate(d); // 날짜 선택하면 바로 시간 모달 오픈
+async function createRoom(){
+set({loading:true,error:null});
+try{
+const id=genId();
+await sb(“rooms”,{method:“POST”,body:JSON.stringify({id,band_name:state.bandName,session_title:state.sessionTitle})});
+const sorted=[…state.selDates].sort((a,b)=>new Date(a.y,a.m,a.d)-new Date(b.y,b.m,b.d));
+for(const d of sorted){
+const t=state.dtMap[dkey(d)];
+await sb(“dates”,{method:“POST”,body:JSON.stringify({room_id:id,date:fmtDate(d.y,d.m,d.d),time:fmtTime(t)})});
 }
-};
-
-// 방 만들기
-const handleCreateRoom = async () => {
-setLoading(true);
-setError(null);
-try {
-const id = genRoomId();
-await sb(“rooms”, { method:“POST”, body: JSON.stringify({ id, band_name:bandName, session_title:sessionTitle }) });
-const sorted = […selectedDates].sort((a,b)=>new Date(a.year,a.month,a.day)-new Date(b.year,b.month,b.day));
-for (const d of sorted) {
-const t = dateTimeMap[dateKey(d)];
-const endH = t ? Math.floor(t.hour + t.duration + parseInt(t.minute)/60) : 0;
-const endM = t ? Math.round(((t.hour + t.duration + parseInt(t.minute)/60) - Math.floor(t.hour + t.duration + parseInt(t.minute)/60)) * 60) : 0;
-const timeStr = t?`${String(t.hour).padStart(2,"0")}:${t.minute} → ${String(endH%24).padStart(2,"0")}:${String(endM).padStart(2,"0")} (${t.duration}시간)`:“시간 미정”;
-await sb(“dates”, { method:“POST”, body: JSON.stringify({ room_id:id, date:formatDate(d.year,d.month,d.day), time:timeStr }) });
-}
-setRoomId(id);
-window.location.hash = id;
+location.hash=id;
 await loadRoom(id);
-setScreen(“login”);
-} catch(e) {
-setError(“방 만들기 실패: “ + e.message);
-}
-setLoading(false);
-};
-
-// 투표 제출
-const handleVoteSubmit = async () => {
-setLoading(true);
-setError(null);
-try {
-for (const [dateId, status] of Object.entries(myVotes)) {
-// 기존 투표 있으면 업데이트, 없으면 insert
-const existing = await sb(`votes?room_id=eq.${roomId}&date_id=eq.${dateId}&member_name=eq.${myName}&select=id`);
-if (existing?.length) {
-await sb(`votes?id=eq.${existing[0].id}`, { method:“PATCH”, prefer:“return=minimal”, body: JSON.stringify({ status }) });
-} else {
-await sb(“votes”, { method:“POST”, body: JSON.stringify({ room_id:roomId, date_id:parseInt(dateId), member_name:myName, member_role:myRole, status }) });
-}
-}
-setVotes(p=>({ …p, [myName]: myVotes }));
-setSubmitted(true);
-setView(“result”);
-} catch(e) {
-setError(“투표 실패: “ + e.message);
-}
-setLoading(false);
-};
-
-const handleAddMember = () => {
-if (!newMemberName.trim()||!newMemberRole) return;
-setNewMemberName(””); setNewMemberRole(””); setShowInviteModal(false);
-};
-
-const inviteLink = roomId ? `${window.location.origin}${window.location.pathname}#${roomId}` : “”;
-
-// 멤버 목록 (투표한 사람들)
-const memberList = Object.keys(votes).map(name=>({
-name, role: Object.values(votes[name]||{})[0] ? name : name,
-}));
-
-const getScoreForDate = (dateId) =>
-Object.values(votes).filter(v=>v[dateId]===“ok”).length;
-
-const bestDate = dates.length
-? dates.reduce((b,d)=>getScoreForDate(d.id)>=getScoreForDate(b.id)?d:b)
-: null;
-
-// ── LANDING ──────────────────────────────────────────
-if (screen===“landing”) return (
-<Wrapper>
-<div style={{ display:“flex”, flexDirection:“column”, minHeight:“92vh”, justifyContent:“space-between”, paddingTop:44 }}>
-<div>
-<div style={{ display:“flex”, alignItems:“baseline”, gap:2, marginBottom:36 }}>
-<span style={{ fontSize:11, letterSpacing:“0.35em”, color:”#7c6af7” }}>합</span>
-<span style={{ fontSize:11, letterSpacing:“0.35em”, color:”#333” }}>주를 </span>
-<span style={{ fontSize:11, letterSpacing:“0.35em”, color:”#7c6af7” }}>간</span>
-<span style={{ fontSize:11, letterSpacing:“0.35em”, color:”#333” }}>단히</span>
-</div>
-<h1 style={{ fontSize:88, fontWeight:“900”, margin:0, lineHeight:0.9, letterSpacing:”-0.05em” }}>
-<span style={{ color:”#7c6af7” }}>합</span><span style={{ color:”#e8e8e8” }}>간</span>
-</h1>
-<p style={{ color:”#333”, fontSize:12, marginTop:24, lineHeight:2.2, letterSpacing:“0.04em” }}>
-날짜 후보 등록 → 멤버 투표 → 합주 확정<br/>
-카톡 단톡방 그만, 한 곳에서 끝내자
-</p>
-</div>
-<div style={{ paddingBottom:24 }}>
-<div style={{ display:“flex”, flexDirection:“column”, gap:10, marginBottom:28 }}>
-{[{icon:“🗓️”,text:“달력에서 날짜 후보 직접 선택”},{icon:“🗳️”,text:“됨 / 애매 / 안됨 투표”},{icon:“✅”,text:“최적 날짜 자동 추천 + 확정”}].map(item=>(
-<div key={item.text} style={{ display:“flex”, alignItems:“center”, gap:14 }}>
-<span style={{ fontSize:15 }}>{item.icon}</span>
-<span style={{ fontSize:12, color:”#444” }}>{item.text}</span>
-</div>
-))}
-</div>
-<button onClick={()=>{ setSetupStep(“info”); setScreen(“setup”); }} style={{…S.btn(), marginTop:0, fontSize:13, padding:“18px”, letterSpacing:“0.25em”}}>
-🎸 합주방 만들기
-</button>
-</div>
-</div>
-</Wrapper>
-);
-
-// ── SETUP ────────────────────────────────────────────
-if (screen===“setup”) return (
-<Wrapper>
-<button onClick={()=>setupStep===“info”?setScreen(“landing”):setScreen(“landing”)}
-style={{ background:“none”, border:“none”, color:”#555”, cursor:“pointer”, fontSize:12, letterSpacing:“0.1em”, marginBottom:28, padding:0 }}>
-← 뒤로
-</button>
-<div style={{ display:“flex”, gap:6, marginBottom:28 }}>
-{[“info”,“calendar”].map((s,i)=>(
-<div key={s} style={{ flex:1, height:3, borderRadius:2, background:[“info”,“calendar”].indexOf(setupStep)>=i?”#7c6af7”:”#1e1e1e”, transition:“background 0.3s” }}/>
-))}
-</div>
-
-```
-  {setupStep==="info" && (
-    <>
-      <div style={{ fontSize:10, color:"#7c6af7", letterSpacing:"0.3em", marginBottom:8 }}>STEP 1</div>
-      <h2 style={{ fontSize:22, fontWeight:"bold", margin:"0 0 4px" }}>밴드 정보</h2>
-      <p style={{ color:"#444", fontSize:12, marginBottom:28 }}>합주방을 만들어보자</p>
-      <span style={S.label}>밴드 이름</span>
-      <input style={{...S.input, marginBottom:16}} value={bandName} onChange={e=>setBandName(e.target.value)} placeholder="예) MRDW 무릉도원"/>
-      <span style={S.label}>합주 이름</span>
-      <input style={S.input} value={sessionTitle} onChange={e=>setSessionTitle(e.target.value)} placeholder="예) 3월 합주"/>
-      <button onClick={()=>setSetupStep("calendar")} style={S.btn(bandName.trim()&&sessionTitle.trim())}>다음 — 날짜 선택</button>
-    </>
-  )}
-
-  {setupStep==="calendar" && (
-    <>
-      <div style={{ fontSize:10, color:"#7c6af7", letterSpacing:"0.3em", marginBottom:8 }}>STEP 2</div>
-      <h2 style={{ fontSize:22, fontWeight:"bold", margin:"0 0 4px" }}>날짜 후보 선택</h2>
-      <p style={{ color:"#444", fontSize:12, marginBottom:20 }}>날짜 선택하면 바로 시간도 설정돼</p>
-      <div style={{ background:"#111", border:"1px solid #1e1e1e", borderRadius:14, padding:"20px 16px", marginBottom:16 }}>
-        <Calendar selectedDates={selectedDates} onToggle={toggleDate}/>
-      </div>
-      {selectedDates.length>0 && (
-        <div style={{ marginBottom:12 }}>
-          <span style={S.label}>선택됨 {selectedDates.length}개</span>
-          <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
-            {[...selectedDates].sort((a,b)=>new Date(a.year,a.month,a.day)-new Date(b.year,b.month,b.day)).map(d=>{
-              const t=dateTimeMap[dateKey(d)];
-              const endH2 = t ? Math.floor(t.hour + t.duration + parseInt(t.minute)/60) : 0;
-              const endM2 = t ? Math.round(((t.hour + t.duration + parseInt(t.minute)/60) - Math.floor(t.hour + t.duration + parseInt(t.minute)/60)) * 60) : 0;
-              const timeStr=t?`${String(t.hour).padStart(2,"0")}:${t.minute} → ${String(endH2%24).padStart(2,"0")}:${String(endM2).padStart(2,"0")} (${t.duration}시간)`:null;
-              return (
-                <div key={dateKey(d)} style={{ display:"flex", alignItems:"center", gap:8, background:"#1a1a1a", border:`1px solid ${t?"#7c6af733":"#f8717133"}`, borderRadius:10, padding:"10px 14px" }}>
-                  <div style={{ flex:1 }}>
-                    <div style={{ fontSize:12, color:"#aaa" }}>{formatDate(d.year,d.month,d.day)}</div>
-                    <div style={{ fontSize:11, color:t?"#7c6af7":"#f87171", marginTop:2 }}>{timeStr||"⚠ 시간 미설정 — 탭해서 설정"}</div>
-                  </div>
-                  <button onClick={()=>setTimeModalDate(d)} style={{ background:"none", border:"1px solid #2a2a2a", borderRadius:6, color:"#555", cursor:"pointer", fontSize:10, padding:"4px 8px", fontFamily:"'Courier New', monospace" }}>수정</button>
-                  <button onClick={()=>toggleDate(d)} style={{ background:"none", border:"none", color:"#444", cursor:"pointer", fontSize:16, padding:0 }}>×</button>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-      {error && <div style={{ fontSize:11, color:"#f87171", marginTop:8 }}>{error}</div>}
-      <button onClick={handleCreateRoom} style={S.btn(selectedDates.length>0 && selectedDates.every(d=>dateTimeMap[dateKey(d)]) && !loading)}>
-        {loading?"만드는 중...":"완료 — 합주방 만들기 🎸"}
-      </button>
-    </>
-  )}
-
-
-
-  {timeModalDate && (
-    <TimeWheelModal
-      dateLabel={formatDate(timeModalDate.year,timeModalDate.month,timeModalDate.day)}
-      initial={dateTimeMap[dateKey(timeModalDate)]}
-      onConfirm={(h,m,dur)=>{ setDateTimeMap(p=>({...p,[dateKey(timeModalDate)]:{hour:h,minute:m,duration:dur}})); setTimeModalDate(null); }}
-      onClose={()=>setTimeModalDate(null)}
-    />
-  )}
-</Wrapper>
-```
-
-);
-
-// ── LOGIN ────────────────────────────────────────────
-if (screen===“login”) return (
-<Wrapper>
-{loading ? <Spinner/> : (
-<>
-<button onClick={()=>{ setScreen(“landing”); window.location.hash=””; }} style={{ background:“none”, border:“none”, color:”#555”, cursor:“pointer”, fontSize:12, letterSpacing:“0.1em”, marginBottom:28, padding:0 }}>← 뒤로</button>
-<div style={{ fontSize:14, fontWeight:“900”, letterSpacing:”-0.02em”, marginBottom:8 }}>
-<span style={{ color:”#7c6af7” }}>합</span><span style={{ color:”#e8e8e8” }}>간</span>
-</div>
-{roomInfo && <div style={{ fontSize:11, color:”#555”, marginBottom:20 }}>{roomInfo.band_name} · {roomInfo.session_title}</div>}
-<h2 style={{ fontSize:22, fontWeight:“bold”, margin:“0 0 4px” }}>
-{loginStep===“name” ? “이름을 알려줘” : “포지션은?”}
-</h2>
-<p style={{ color:”#444”, fontSize:12, marginBottom:28 }}>
-{loginStep===“name” ? “합주 일정에 참여하려면 이름이 필요해” : “밴드에서 어떤 파트야?”}
-</p>
-{loginStep===“name” ? (
-<>
-<span style={S.label}>이름</span>
-<input style={S.input} placeholder=“예) 이지구” value={myName} onChange={e=>setMyName(e.target.value)} onKeyDown={e=>e.key===“Enter”&&myName.trim()&&setLoginStep(“role”)} autoFocus/>
-<button onClick={()=>setLoginStep(“role”)} style={S.btn(myName.trim().length>0)}>다음</button>
-</>
-) : (
-<>
-<span style={S.label}>포지션</span>
-<div style={{ display:“grid”, gridTemplateColumns:“1fr 1fr”, gap:8 }}>
-{ROLES.map(r=>(
-<button key={r} onClick={()=>setMyRole(r)} style={{ padding:“12px 0”, borderRadius:10, cursor:“pointer”, fontSize:12, border:myRole===r?“1px solid #7c6af7”:“1px solid #2a2a2a”, background:myRole===r?”#7c6af722”:”#1a1a1a”, color:myRole===r?”#7c6af7”:”#555”, fontFamily:”‘Courier New’, monospace” }}>
-{ROLE_EMOJI[r]} {r}
-</button>
-))}
-</div>
-<button onClick={async ()=>{ if(myRole){ await loadRoom(roomId); setScreen(“app”); }}} style={S.btn(!!myRole)}>
-참여하기
-</button>
-</>
-)}
-</>
-)}
-</Wrapper>
-);
-
-// ── APP ──────────────────────────────────────────────
-if (screen===“app”) return (
-<Wrapper>
-{loading && <div style={{ position:“fixed”, top:16, right:16, fontSize:10, color:”#555”, zIndex:99 }}>새로고침 중…</div>}
-
-```
-  {/* 헤더 */}
-  <div style={{ marginBottom:24 }}>
-    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
-      <div>
-        <div style={{ fontSize:14, fontWeight:"900", letterSpacing:"-0.02em", marginBottom:4 }}>
-          <span style={{ color:"#7c6af7" }}>합</span><span style={{ color:"#e8e8e8" }}>간</span>
-        </div>
-        <h1 style={{ fontSize:20, fontWeight:"bold", margin:0, lineHeight:1.2 }}>
-          {roomInfo?.band_name || bandName}<br/>
-          <span style={{ color:"#7c6af7" }}>{roomInfo?.session_title || sessionTitle}</span>
-        </h1>
-      </div>
-      <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-        <button onClick={()=>loadRoom(roomId)} style={{ background:"none", border:"1px solid #2a2a2a", borderRadius:8, padding:"6px 10px", color:"#555", cursor:"pointer", fontSize:11, fontFamily:"'Courier New', monospace" }}>↻</button>
-      </div>
-    </div>
-    <p style={{ color:"#333", fontSize:11, marginTop:6 }}>방 코드: <span style={{ color:"#7c6af7", letterSpacing:"0.1em" }}>{roomId}</span> · 날짜 {dates.length}개</p>
-  </div>
-
-  {/* 탭 */}
-  <div style={{ display:"flex", marginBottom:24, borderBottom:"1px solid #1e1e1e" }}>
-    {["vote","result","members"].map(tab=>(
-      <button key={tab} onClick={()=>setView(tab)} style={{ background:"none", border:"none", cursor:"pointer", padding:"8px 16px 12px", fontSize:11, letterSpacing:"0.15em", textTransform:"uppercase", color:view===tab?"#7c6af7":"#333", borderBottom:view===tab?"2px solid #7c6af7":"2px solid transparent", fontFamily:"'Courier New', monospace" }}>
-        {tab==="vote"?"내 일정":tab==="result"?"현황":"멤버"}
-      </button>
-    ))}
-  </div>
-
-  {/* 내 일정 탭 */}
-  {view==="vote" && (
-    <>
-      {submitted ? (
-        <div style={{ textAlign:"center", paddingTop:40 }}>
-          <div style={{ fontSize:32, marginBottom:12 }}>✅</div>
-          <div style={{ fontSize:16, fontWeight:"bold", marginBottom:8 }}>투표 완료!</div>
-          <div style={{ fontSize:12, color:"#555", marginBottom:24 }}>현황 탭에서 결과 확인해봐</div>
-          <button onClick={()=>{ setSubmitted(false); }} style={{...S.btn(), marginTop:0}}>다시 수정하기</button>
-        </div>
-      ) : (
-        <>
-          <p style={{ fontSize:11, color:"#444", marginBottom:16 }}>{myName}님, 각 날짜 가능 여부를 선택해줘</p>
-          {dates.map(d=>(
-            <div key={d.id} style={{ ...S.card, borderColor:myVotes[d.id]==="ok"?"#4ade8033":myVotes[d.id]==="maybe"?"#facc1533":"#1e1e1e" }}>
-              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
-                <div>
-                  <div style={{ fontSize:14, fontWeight:"bold" }}>{d.date}</div>
-                  <div style={{ fontSize:11, color:"#444", marginTop:2 }}>{d.time}</div>
-                </div>
-                <div style={{ fontSize:10, padding:"3px 8px", borderRadius:20, background:"#1a1a1a", color:"#555" }}>{getScoreForDate(d.id)}명 가능</div>
-              </div>
-              <div style={{ display:"flex", gap:8 }}>
-                {["ok","maybe","no"].map(s=>(
-                  <button key={s} onClick={()=>setMyVotes(p=>({...p,[d.id]:s}))} style={{ flex:1, padding:"9px 0", borderRadius:8, cursor:"pointer", fontSize:11, border:myVotes[d.id]===s?`1px solid ${STATUS_COLOR[s]}`:"1px solid #2a2a2a", background:myVotes[d.id]===s?`${STATUS_COLOR[s]}22`:"#1a1a1a", color:myVotes[d.id]===s?STATUS_COLOR[s]:"#444", fontFamily:"'Courier New', monospace" }}>{STATUS[s]}</button>
-                ))}
-              </div>
-            </div>
-          ))}
-          {error && <div style={{ fontSize:11, color:"#f87171", marginBottom:8 }}>{error}</div>}
-          <button onClick={handleVoteSubmit} style={S.btn(dates.every(d=>myVotes[d.id])&&!loading)}>
-            {loading?"제출 중...":"제출하기"}
-          </button>
-        </>
-      )}
-    </>
-  )}
-
-  {/* 현황 탭 */}
-  {view==="result" && (
-    <>
-      {bestDate && (
-        <div style={{ background:"linear-gradient(135deg,#7c6af722,#4ade8011)", border:"1px solid #7c6af733", borderRadius:14, padding:"18px 20px", marginBottom:20 }}>
-          <div style={{ fontSize:10, color:"#7c6af7", letterSpacing:"0.3em", marginBottom:6 }}>BEST DATE</div>
-          <div style={{ fontSize:18, fontWeight:"bold" }}>{bestDate.date}</div>
-          <div style={{ fontSize:12, color:"#666", marginTop:2 }}>{bestDate.time} · {getScoreForDate(bestDate.id)}명 가능</div>
-          {!confirmed
-            ? <button onClick={()=>setConfirmed(bestDate)} style={{ marginTop:14, padding:"8px 20px", background:"#7c6af7", border:"none", borderRadius:8, color:"#fff", fontSize:11, cursor:"pointer", fontFamily:"'Courier New', monospace" }}>이 날로 확정 ✓</button>
-            : <div style={{ marginTop:12, fontSize:12, color:"#4ade80" }}>✓ {confirmed.date} 합주 확정!</div>
-          }
-        </div>
-      )}
-      {dates.map(d=>{
-        const voterNames = Object.keys(votes);
-        return (
-          <div key={d.id} style={S.card}>
-            <div style={{ display:"flex", justifyContent:"space-between", marginBottom:12 }}>
-              <div><span style={{ fontSize:13, fontWeight:"bold" }}>{d.date}</span><span style={{ fontSize:11, color:"#444", marginLeft:8 }}>{d.time}</span></div>
-              <div style={{ fontSize:12, color:"#555" }}>{getScoreForDate(d.id)}/{voterNames.length}명</div>
-            </div>
-            <div style={{ display:"flex", flexDirection:"column", gap:7 }}>
-              {voterNames.length === 0
-                ? <div style={{ fontSize:11, color:"#333" }}>아직 투표한 멤버가 없어</div>
-                : voterNames.map(name=>{
-                    const v=votes[name]?.[d.id];
-                    return (
-                      <div key={name} style={{ display:"flex", alignItems:"center", gap:10 }}>
-                        <span style={{ fontSize:12, flex:1, color:"#aaa" }}>{name}{name===myName?" (나)":""}</span>
-                        <span style={{ fontSize:10, padding:"2px 8px", borderRadius:10, background:v?`${STATUS_COLOR[v]}22`:"#1a1a1a", color:v?STATUS_COLOR[v]:"#2a2a2a" }}>{v?STATUS[v]:"미응답"}</span>
-                      </div>
-                    );
-                  })
-              }
-            </div>
-          </div>
-        );
-      })}
-    </>
-  )}
-
-  {/* 멤버 탭 */}
-  {view==="members" && (
-    <>
-      {Object.keys(votes).length === 0
-        ? <div style={{ fontSize:12, color:"#333", marginBottom:20 }}>아직 투표한 멤버가 없어. 링크를 공유해봐!</div>
-        : Object.keys(votes).map(name=>(
-          <div key={name} style={{ ...S.card, display:"flex", alignItems:"center", gap:14 }}>
-            <div style={{ width:40, height:40, borderRadius:"50%", background:name===myName?"#7c6af722":"#1a1a1a", border:name===myName?"1px solid #7c6af7":"1px solid #2a2a2a", display:"flex", alignItems:"center", justifyContent:"center", fontSize:18 }}>
-              {ROLE_EMOJI["기타(other)"]}
-            </div>
-            <div style={{ flex:1 }}>
-              <div style={{ fontSize:13, fontWeight:"bold" }}>{name}{name===myName?" (나)":""}</div>
-            </div>
-            <div style={{ fontSize:9, padding:"3px 8px", borderRadius:10, background:"#4ade8011", color:"#4ade80", border:"1px solid #4ade8033" }}>투표완료</div>
-          </div>
-        ))
-      }
-
-      {/* 초대 링크 */}
-      <div style={{ ...S.card, marginTop:8 }}>
-        <span style={S.label}>초대 링크 공유</span>
-        <div style={{ background:"#1a1a1a", borderRadius:10, padding:"12px 14px", fontSize:10, color:"#555", marginBottom:12, wordBreak:"break-all", lineHeight:1.6 }}>
-          {inviteLink}
-        </div>
-        <button onClick={()=>{ navigator.clipboard?.writeText(inviteLink); setInviteCopied(true); setTimeout(()=>setInviteCopied(false),2000); }} style={{ ...S.btn(), marginTop:0, background:inviteCopied?"#4ade8022":"#7c6af7", color:inviteCopied?"#4ade80":"#fff", border:inviteCopied?"1px solid #4ade8044":"none" }}>
-          {inviteCopied?"✓ 복사됨!":"링크 복사 — 멤버에게 공유"}
-        </button>
-      </div>
-    </>
-  )}
-
-  <div style={{ marginTop:48, textAlign:"center", color:"#1e1e1e", fontSize:10, letterSpacing:"0.2em" }}>합간 · MRDW 무릉도원</div>
-</Wrapper>
-```
-
-);
-
-return <Wrapper><Spinner/></Wrapper>;
+set({screen:“login”,roomId:id});
+}catch(e){set({loading:false,error:“방 만들기 실패: “+e.message});}
 }
 
-function Wrapper({children}) {
-return (
-<div style={{ minHeight:“100vh”, background:”#0a0a0a”, fontFamily:”‘Courier New’, monospace”, color:”#e8e8e8”, position:“relative”, overflow:“hidden” }}>
-<div style={{ position:“fixed”, inset:0, zIndex:0, pointerEvents:“none”, background:“radial-gradient(ellipse at 20% 50%, #1a0a2e 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, #0a1a2e 0%, transparent 50%)” }}/>
-<div style={{ position:“relative”, zIndex:1, maxWidth:480, margin:“0 auto”, padding:“28px 20px 60px” }}>
-{children}
-</div>
-</div>
+async function submitVote(){
+set({loading:true,error:null});
+try{
+for(const [did,status] of Object.entries(state.myVotes)){
+const ex=await sb(“votes?room_id=eq.”+state.roomId+”&date_id=eq.”+did+”&member_name=eq.”+encodeURIComponent(state.myName)+”&select=id”);
+if(ex&&ex.length){
+await sb(“votes?id=eq.”+ex[0].id,{method:“PATCH”,prefer:“return=minimal”,body:JSON.stringify({status})});
+}else{
+await sb(“votes”,{method:“POST”,body:JSON.stringify({room_id:state.roomId,date_id:parseInt(did),member_name:state.myName,member_role:state.myRole,status})});
+}
+}
+const nv={…state.votes,[state.myName]:{…state.myVotes}};
+set({loading:false,votes:nv,submitted:true,view:“result”});
+}catch(e){set({loading:false,error:“투표 실패: “+e.message});}
+}
+
+function toggleDate(d){
+const exists=state.selDates.find(s=>s.y===d.y&&s.m===d.m&&s.d===d.d);
+if(exists){
+const dm={…state.dtMap}; delete dm[dkey(d)];
+set({selDates:state.selDates.filter(s=>!(s.y===d.y&&s.m===d.m&&s.d===d.d)),dtMap:dm});
+}else{
+set({selDates:[…state.selDates,d],timeModalDate:d,timeHour:14,timeMin:“00”,timeDur:2});
+}
+}
+
+function scoreFor(dateId){return Object.values(state.votes).filter(v=>v[dateId]===“ok”).length;}
+
+// ── 렌더링
+function el(tag,attrs,…children){
+const e=document.createElement(tag);
+for(const [k,v] of Object.entries(attrs||{})){
+if(k===“style”&&typeof v===“object”) Object.assign(e.style,v);
+else if(k.startsWith(“on”)) e.addEventListener(k.slice(2).toLowerCase(),v);
+else if(k===“className”) e.className=v;
+else if(k===“value”&&(tag===“input”||tag===“textarea”)) e.value=v;
+else if(k===“placeholder”) e.placeholder=v;
+else if(k===“disabled”) e.disabled=v;
+else if(k===“type”) e.type=v;
+else e.setAttribute(k,v);
+}
+for(const c of children.flat()){
+if(c==null||c===false) continue;
+e.appendChild(typeof c===“string”||typeof c===“number”?document.createTextNode(c):c);
+}
+return e;
+}
+
+function logo(size=14){
+const d=el(“div”,{style:{fontSize:size,fontWeight:900,letterSpacing:”-.02em”}});
+d.appendChild(el(“span”,{style:{color:”#7c6af7”}},“합”));
+d.appendChild(el(“span”,{style:{color:”#e8e8e8”}},“간”));
+return d;
+}
+
+function renderLanding(){
+return el(“div”,{style:{minHeight:“100vh”,display:“flex”,flexDirection:“column”,justifyContent:“space-between”,paddingTop:“44px”}},
+el(“div”,{},
+el(“div”,{style:{fontSize:“80px”,fontWeight:900,lineHeight:.9,letterSpacing:”-.05em”,marginBottom:“8px”}},
+el(“span”,{style:{color:”#7c6af7”}},“합”),
+el(“span”,{style:{color:”#e8e8e8”}},“간”)
+),
+el(“p”,{style:{color:”#555”,fontSize:“11px”,letterSpacing:”.3em”}},“합주를 간단히”),
+el(“p”,{style:{color:”#333”,fontSize:“12px”,marginTop:“24px”,lineHeight:“2.2”}},“날짜 후보 등록 → 멤버 투표 → 합주 확정”)
+),
+el(“div”,{style:{paddingBottom:“24px”}},
+el(“button”,{className:“btn”,style:{fontSize:“13px”,padding:“18px”,marginTop:“0”},onClick:()=>set({screen:“setup”,setupStep:“info”})},“🎸 합주방 만들기”)
+)
 );
 }
 
-  </script>
-  <script>
-    const { useState, useRef, useEffect, useCallback } = React;
-    const code = document.getElementById("app-code").textContent;
-    const transformed = sucrase.transform(code, { transforms: ["jsx"] }).code;
-    eval(transformed);
-    const root = ReactDOM.createRoot(document.getElementById("root"));
-    root.render(React.createElement(Hapgan));
-  </script>
+function renderSetup(){
+const s=state;
+const back=el(“button”,{style:{background:“none”,border:“none”,color:”#555”,cursor:“pointer”,fontSize:“12px”,marginBottom:“28px”,padding:“0”},onClick:()=>s.setupStep===“info”?set({screen:“landing”}):set({setupStep:“info”})},“← 뒤로”);
+
+if(s.setupStep===“info”){
+const inp1=el(“input”,{className:“input”,placeholder:“예) MRDW 무릉도원”,value:s.bandName,style:{marginBottom:“16px”},onInput:e=>set({bandName:e.target.value})});
+const inp2=el(“input”,{className:“input”,placeholder:“예) 3월 합주”,value:s.sessionTitle,onInput:e=>set({sessionTitle:e.target.value})});
+const btn=el(“button”,{className:“btn”,disabled:!(s.bandName.trim()&&s.sessionTitle.trim()),onClick:()=>set({setupStep:“calendar”})},“다음 — 날짜 선택”);
+return el(“div”,{},back,
+el(“div”,{style:{fontSize:“10px”,color:”#7c6af7”,letterSpacing:”.3em”,marginBottom:“8px”}},“STEP 1”),
+el(“h2”,{style:{fontSize:“22px”,fontWeight:“bold”,margin:“0 0 24px”}},“밴드 정보”),
+el(“span”,{className:“label”},“밴드 이름”),inp1,
+el(“span”,{className:“label”},“합주 이름”),inp2,btn
+);
+}
+
+// calendar step
+const today=new Date();
+let cy=s._cy||today.getFullYear(), cm=s.*cm||today.getMonth();
+const dim=new Date(cy,cm+1,0).getDate();
+const fd=new Date(cy,cm,1).getDay();
+const cells=[…Array(fd).fill(null),…Array.from({length:dim},(*,i)=>i+1)];
+
+const calDays=el(“div”,{className:“cal-grid”},
+…DAYS.map((d,i)=>el(“div”,{style:{textAlign:“center”,fontSize:“10px”,color:i===0?”#f87171”:i===6?”#9b8ff7”:”#444”,padding:“4px 0”}},d))
+);
+const calCells=el(“div”,{className:“cal-grid”},
+…cells.map((day,i)=>{
+const dow=i%7;
+const isPast=day&&(()=>{const dt=new Date(cy,cm,day);dt.setHours(0,0,0,0);const t=new Date();t.setHours(0,0,0,0);return dt<t;})();
+const isSel=day&&s.selDates.some(sd=>sd.y===cy&&sd.m===cm&&sd.d===day);
+let cls=“cal-day”;
+if(isSel)cls+=” sel”;else if(!day||isPast)cls+=” past”;else if(dow===0)cls+=” sun”;else if(dow===6)cls+=” sat”;
+return el(“button”,{className:cls,onClick:()=>!isPast&&day&&toggleDate({y:cy,m:cm,d:day})},day||””);
+})
+);
+
+const selList=s.selDates.length?el(“div”,{style:{marginBottom:“12px”}},
+el(“span”,{className:“label”},“선택됨 “+s.selDates.length+“개”),
+…[…s.selDates].sort((a,b)=>new Date(a.y,a.m,a.d)-new Date(b.y,b.m,b.d)).map(d=>{
+const t=s.dtMap[dkey(d)];
+return el(“div”,{style:{display:“flex”,alignItems:“center”,gap:“8px”,background:”#1a1a1a”,border:“1px solid “+(t?”#7c6af733”:”#f8717133”),borderRadius:“10px”,padding:“10px 14px”,marginBottom:“6px”}},
+el(“div”,{style:{flex:1}},
+el(“div”,{style:{fontSize:“12px”,color:”#aaa”}},fmtDate(d.y,d.m,d.d)),
+el(“div”,{style:{fontSize:“11px”,color:t?”#7c6af7”:”#f87171”,marginTop:“2px”}},t?fmtTime(t):“⚠ 시간 미설정”)
+),
+el(“button”,{style:{background:“none”,border:“1px solid #2a2a2a”,borderRadius:“6px”,color:”#555”,cursor:“pointer”,fontSize:“10px”,padding:“4px 8px”},onClick:()=>set({timeModalDate:d,timeHour:t?t.h:14,timeMin:t?t.m:“00”,timeDur:t?t.dur:2})},“수정”),
+el(“button”,{style:{background:“none”,border:“none”,color:”#444”,cursor:“pointer”,fontSize:“16px”,padding:“0”},onClick:()=>toggleDate(d)},“×”)
+);
+})
+):null;
+
+const allReady=s.selDates.length>0&&s.selDates.every(d=>s.dtMap[dkey(d)]);
+const createBtn=el(“button”,{className:“btn”,disabled:!allReady||s.loading,onClick:createRoom},s.loading?“만드는 중…”:“완료 — 합주방 만들기 🎸”);
+
+const modal=s.timeModalDate?renderTimeModal():null;
+
+return el(“div”,{},back,
+el(“div”,{style:{fontSize:“10px”,color:”#7c6af7”,letterSpacing:”.3em”,marginBottom:“8px”}},“STEP 2”),
+el(“h2”,{style:{fontSize:“22px”,fontWeight:“bold”,margin:“0 0 4px”}},“날짜 + 시간 선택”),
+el(“p”,{style:{color:”#444”,fontSize:“12px”,marginBottom:“20px”}},“날짜 누르면 시간도 바로 설정돼”),
+el(“div”,{className:“card”},
+el(“div”,{style:{display:“flex”,justifyContent:“space-between”,alignItems:“center”,marginBottom:“16px”}},
+el(“button”,{style:{background:“none”,border:“none”,color:”#555”,cursor:“pointer”,fontSize:“20px”,padding:“4px 10px”},onClick:()=>set({_cm:cm===0?11:cm-1,_cy:cm===0?cy-1:cy})},”‹”),
+el(“span”,{style:{fontSize:“14px”,fontWeight:“bold”}},cy+“년 “+MONTHS[cm]),
+el(“button”,{style:{background:“none”,border:“none”,color:”#555”,cursor:“pointer”,fontSize:“20px”,padding:“4px 10px”},onClick:()=>set({_cm:cm===11?0:cm+1,_cy:cm===11?cy+1:cy})},”›”)
+),
+calDays,calCells
+),
+selList,
+s.error?el(“div”,{className:“err”},s.error):null,
+createBtn,
+modal
+);
+}
+
+function renderTimeModal(){
+const s=state;
+const d=s.timeModalDate;
+if(!d) return null;
+const em=s.timeHour*60+parseInt(s.timeMin)+s.timeDur*60;
+const preview=pad(s.timeHour)+”:”+s.timeMin+” → “+pad(Math.floor(em/60)%24)+”:”+pad(em%60)+” (”+s.timeDur+“시간)”;
+
+const hourSel=el(“select”,{style:{background:”#1a1a1a”,border:“1px solid #2a2a2a”,borderRadius:“8px”,color:”#e8e8e8”,padding:“8px 12px”,fontSize:“16px”},onChange:e=>set({timeHour:parseInt(e.target.value)})},
+…Array.from({length:16},(_,i)=>i+8).map(h=>{ const o=el(“option”,{value:h},pad(h)+“시”); if(h===s.timeHour)o.selected=true; return o; })
+);
+const minSel=el(“select”,{style:{background:”#1a1a1a”,border:“1px solid #2a2a2a”,borderRadius:“8px”,color:”#e8e8e8”,padding:“8px 12px”,fontSize:“16px”},onChange:e=>set({timeMin:e.target.value})},
+…[“00”,“15”,“30”,“45”].map(m=>{ const o=el(“option”,{value:m},m+“분”); if(m===s.timeMin)o.selected=true; return o; })
+);
+
+return el(“div”,{className:“modal-bg”,onClick:()=>set({timeModalDate:null})},
+el(“div”,{className:“modal”,onClick:e=>e.stopPropagation()},
+el(“div”,{style:{fontSize:“11px”,color:”#555”,marginBottom:“4px”}},fmtDate(d.y,d.m,d.d)),
+el(“div”,{style:{fontSize:“16px”,fontWeight:“bold”,marginBottom:“20px”}},“시간 설정”),
+el(“div”,{style:{fontSize:“10px”,color:”#555”,letterSpacing:”.2em”,marginBottom:“10px”}},“시작 시간”),
+el(“div”,{style:{display:“flex”,gap:“12px”,marginBottom:“20px”,justifyContent:“center”}},hourSel,minSel),
+el(“div”,{style:{fontSize:“10px”,color:”#555”,letterSpacing:”.2em”,marginBottom:“10px”}},“합주 시간”),
+el(“div”,{className:“dur-row”},
+…DURS.map(dur=>el(“button”,{className:“dur-btn”+(s.timeDur===dur?” on”:””),onClick:()=>set({timeDur:dur})},dur+“시간”))
+),
+el(“div”,{style:{background:”#1a1a1a”,borderRadius:“10px”,padding:“12px”,textAlign:“center”,marginBottom:“20px”,fontSize:“16px”,fontWeight:“bold”}},preview),
+el(“button”,{className:“btn”,style:{marginTop:“0”},onClick:()=>{
+const dm={…s.dtMap,[dkey(d)]:{h:s.timeHour,m:s.timeMin,dur:s.timeDur}};
+set({dtMap:dm,timeModalDate:null});
+}},“확인”)
+)
+);
+}
+
+function renderLogin(){
+const s=state;
+if(s.loading) return el(“div”,{},el(“div”,{className:“spinner”}));
+const back=el(“button”,{style:{background:“none”,border:“none”,color:”#555”,cursor:“pointer”,fontSize:“12px”,marginBottom:“28px”,padding:“0”},onClick:()=>{set({screen:“landing”});location.hash=””;}});
+back.textContent=“← 뒤로”;
+
+if(s.loginStep===“name”){
+const inp=el(“input”,{className:“input”,placeholder:“예) 이지구”,value:s.myName,onInput:e=>set({myName:e.target.value})});
+return el(“div”,{},back,logo(),
+s.roomInfo?el(“div”,{style:{fontSize:“11px”,color:”#555”,margin:“8px 0 20px”}},s.roomInfo.band_name+” · “+s.roomInfo.session_title):null,
+el(“h2”,{style:{fontSize:“22px”,fontWeight:“bold”,margin:“0 0 4px”}},“이름을 알려줘”),
+el(“p”,{style:{color:”#444”,fontSize:“12px”,marginBottom:“28px”}},“합주 일정에 참여하려면 이름이 필요해”),
+el(“span”,{className:“label”},“이름”),inp,
+el(“button”,{className:“btn”,disabled:!s.myName.trim(),onClick:()=>s.myName.trim()&&set({loginStep:“role”})},“다음”)
+);
+}
+
+return el(“div”,{},back,logo(),
+el(“h2”,{style:{fontSize:“22px”,fontWeight:“bold”,margin:“16px 0 4px”}},“포지션은?”),
+el(“p”,{style:{color:”#444”,fontSize:“12px”,marginBottom:“28px”}},“밴드에서 어떤 파트야?”),
+el(“div”,{className:“role-grid”},
+…ROLES.map(r=>el(“button”,{className:“role-btn”+(s.myRole===r?” on”:””),onClick:()=>set({myRole:r})},EMO[r]+” “+r))
+),
+el(“button”,{className:“btn”,disabled:!s.myRole,onClick:async()=>{if(s.myRole){await loadRoom(s.roomId);set({screen:“app”});}}},“참여하기”)
+);
+}
+
+function renderApp(){
+const s=state;
+const best=s.dates.length?s.dates.reduce((b,d)=>scoreFor(d.id)>=scoreFor(b.id)?d:b):null;
+const invLink=s.roomId?location.origin+location.pathname+”#”+s.roomId:””;
+
+const header=el(“div”,{style:{marginBottom:“24px”}},
+el(“div”,{style:{display:“flex”,justifyContent:“space-between”,alignItems:“flex-start”}},
+el(“div”,{},logo(),
+el(“h1”,{style:{fontSize:“20px”,fontWeight:“bold”,margin:“4px 0 0”,lineHeight:“1.2”}},
+(s.roomInfo?.band_name||s.bandName)+” “,
+el(“span”,{style:{color:”#7c6af7”}},s.roomInfo?.session_title||s.sessionTitle)
+)
+),
+el(“button”,{style:{background:“none”,border:“1px solid #2a2a2a”,borderRadius:“8px”,padding:“6px 10px”,color:”#555”,cursor:“pointer”,fontSize:“11px”},onClick:()=>loadRoom(s.roomId)},“↻”)
+),
+el(“p”,{style:{color:”#333”,fontSize:“11px”,marginTop:“6px”}},“방 코드: “,el(“span”,{style:{color:”#7c6af7”}},s.roomId),” · 날짜 “+s.dates.length+“개”)
+);
+
+const tabs=el(“div”,{className:“tabs”},
+…[“vote”,“result”,“members”].map(t=>el(“button”,{className:“tab”+(s.view===t?” on”:””),onClick:()=>set({view:t})},t===“vote”?“내 일정”:t===“result”?“현황”:“멤버”))
+);
+
+let content;
+if(s.view===“vote”){
+if(s.submitted){
+content=el(“div”,{style:{textAlign:“center”,paddingTop:“40px”}},
+el(“div”,{style:{fontSize:“32px”,marginBottom:“12px”}},“✅”),
+el(“div”,{style:{fontSize:“16px”,fontWeight:“bold”,marginBottom:“8px”}},“투표 완료!”),
+el(“div”,{style:{fontSize:“12px”,color:”#555”,marginBottom:“24px”}},“현황 탭에서 결과 확인해봐”),
+el(“button”,{className:“btn”,style:{marginTop:“0”},onClick:()=>set({submitted:false})},“다시 수정하기”)
+);
+}else{
+content=el(“div”,{},
+el(“p”,{style:{fontSize:“11px”,color:”#444”,marginBottom:“16px”}},s.myName+“님, 각 날짜 가능 여부를 선택해줘”),
+…s.dates.map(d=>el(“div”,{className:“card”,style:{borderColor:s.myVotes[d.id]===“ok”?”#4ade8033”:s.myVotes[d.id]===“maybe”?”#facc1533”:”#1e1e1e”}},
+el(“div”,{style:{display:“flex”,justifyContent:“space-between”,alignItems:“center”}},
+el(“div”,{},el(“div”,{style:{fontSize:“14px”,fontWeight:“bold”}},d.date),el(“div”,{style:{fontSize:“11px”,color:”#444”,marginTop:“2px”}},d.time)),
+el(“div”,{style:{fontSize:“10px”,padding:“3px 8px”,borderRadius:“20px”,background:”#1a1a1a”,color:”#555”}},scoreFor(d.id)+“명 가능”)
+),
+el(“div”,{className:“status-row”},
+…[“ok”,“maybe”,“no”].map(sv=>el(“button”,{className:“status-btn”,
+style:{borderColor:s.myVotes[d.id]===sv?SC[sv]:”#2a2a2a”,background:s.myVotes[d.id]===sv?SC[sv]+“22”:”#1a1a1a”,color:s.myVotes[d.id]===sv?SC[sv]:”#444”},
+onClick:()=>set({myVotes:{…s.myVotes,[d.id]:sv}})},SL[sv]))
+)
+)),
+s.error?el(“div”,{className:“err”},s.error):null,
+el(“button”,{className:“btn”,disabled:!s.dates.every(d=>s.myVotes[d.id])||s.loading,onClick:submitVote},s.loading?“제출 중…”:“제출하기”)
+);
+}
+}else if(s.view===“result”){
+content=el(“div”,{},
+best?el(“div”,{style:{background:“linear-gradient(135deg,#7c6af722,#4ade8011)”,border:“1px solid #7c6af733”,borderRadius:“14px”,padding:“18px 20px”,marginBottom:“20px”}},
+el(“div”,{style:{fontSize:“10px”,color:”#7c6af7”,letterSpacing:”.3em”,marginBottom:“6px”}},“BEST DATE”),
+el(“div”,{style:{fontSize:“18px”,fontWeight:“bold”}},best.date),
+el(“div”,{style:{fontSize:“12px”,color:”#666”,marginTop:“2px”}},best.time+” · “+scoreFor(best.id)+“명 가능”),
+!s.confirmed
+?el(“button”,{style:{marginTop:“14px”,padding:“8px 20px”,background:”#7c6af7”,border:“none”,borderRadius:“8px”,color:”#fff”,fontSize:“11px”,cursor:“pointer”},onClick:()=>set({confirmed:best})},“이 날로 확정 ✓”)
+:el(“div”,{style:{marginTop:“12px”,fontSize:“12px”,color:”#4ade80”}},“✓ “+s.confirmed.date+” 합주 확정!”)
+):null,
+…s.dates.map(d=>el(“div”,{className:“card”},
+el(“div”,{style:{display:“flex”,justifyContent:“space-between”,marginBottom:“12px”}},
+el(“span”,{style:{fontSize:“13px”,fontWeight:“bold”}},d.date),
+el(“span”,{style:{fontSize:“12px”,color:”#555”}},scoreFor(d.id)+”/”+Object.keys(s.votes).length+“명”)
+),
+el(“div”,{style:{fontSize:“11px”,color:”#555”,marginBottom:“6px”}},d.time),
+…Object.keys(s.votes).length===0
+?[el(“div”,{style:{fontSize:“11px”,color:”#333”}},“아직 투표한 멤버가 없어”)]
+:Object.keys(s.votes).map(name=>{
+const v=s.votes[name]?.[d.id];
+return el(“div”,{style:{display:“flex”,alignItems:“center”,gap:“10px”,marginBottom:“6px”}},
+el(“span”,{style:{fontSize:“12px”,flex:1,color:”#aaa”}},name+(name===s.myName?” (나)”:””)),
+el(“span”,{style:{fontSize:“10px”,padding:“2px 8px”,borderRadius:“10px”,background:v?SC[v]+“22”:”#1a1a1a”,color:v?SC[v]:”#333”}},v?SL[v]:“미응답”)
+);
+})
+))
+);
+}else{
+content=el(“div”,{},
+…Object.keys(s.votes).map(name=>el(“div”,{className:“card”,style:{display:“flex”,alignItems:“center”,gap:“14px”}},
+el(“div”,{style:{fontSize:“18px”}},“🎵”),
+el(“div”,{style:{flex:1,fontSize:“13px”,fontWeight:“bold”}},name+(name===s.myName?” (나)”:””)),
+el(“div”,{style:{fontSize:“9px”,padding:“3px 8px”,borderRadius:“10px”,background:”#4ade8011”,color:”#4ade80”,border:“1px solid #4ade8033”}},“투표완료”)
+)),
+el(“div”,{className:“card”,style:{marginTop:“8px”}},
+el(“span”,{className:“label”},“초대 링크”),
+el(“div”,{style:{background:”#1a1a1a”,borderRadius:“10px”,padding:“12px”,fontSize:“10px”,color:”#555”,marginBottom:“12px”,wordBreak:“break-all”}},invLink),
+el(“button”,{className:“btn”,style:{marginTop:“0”,background:s.inviteCopied?”#4ade8022”:”#7c6af7”,color:s.inviteCopied?”#4ade80”:”#fff”},
+onClick:()=>{navigator.clipboard?.writeText(invLink);set({inviteCopied:true});setTimeout(()=>set({inviteCopied:false}),2000);}},
+s.inviteCopied?“✓ 복사됨!”:“링크 복사 — 멤버에게 공유”)
+)
+);
+}
+
+return el(“div”,{},header,tabs,content,
+el(“div”,{style:{marginTop:“48px”,textAlign:“center”,color:”#1e1e1e”,fontSize:“10px”,letterSpacing:”.2em”}},“합간 · MRDW 무릉도원”)
+);
+}
+
+function render(){
+const root=document.getElementById(“root”);
+root.innerHTML=””;
+const s=state;
+let content;
+if(s.screen===“landing”) content=renderLanding();
+else if(s.screen===“setup”) content=renderSetup();
+else if(s.screen===“login”) content=renderLogin();
+else if(s.screen===“app”) content=renderApp();
+else content=el(“div”,{},el(“div”,{className:“spinner”}));
+root.appendChild(content);
+}
+
+render();
+
+// 자동 갱신
+setInterval(()=>{ if(state.screen===“app”&&state.roomId) loadRoom(state.roomId); },15000);
+</script>
+
 </body>
 </html>
