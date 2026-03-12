@@ -153,8 +153,14 @@ function el(tag,attrs,...children){
   for(const [k,v] of Object.entries(attrs||{})){
     if(k==="style"&&typeof v==="object") Object.assign(e.style,v);
     else if(k.startsWith("on")) e.addEventListener(k.slice(2).toLowerCase(),v);
+    if(tag==="input"||tag==="textarea"){
+      e.addEventListener("compositionstart",()=>e._composing=true);
+      e.addEventListener("compositionend",()=>{e._composing=false; e.dispatchEvent(new Event("input"));});
+    }
     else if(k==="className") e.className=v;
-    else if(k==="value"&&(tag==="input"||tag==="textarea")) e.value=v;
+    else if(k==="value"&&(tag==="input"||tag==="textarea")) {
+      if(e.value !== v) e.value=v;
+    }
     else if(k==="placeholder") e.placeholder=v;
     else if(k==="disabled") e.disabled=v;
     else if(k==="type") e.type=v;
@@ -195,8 +201,8 @@ function renderSetup(){
   const back=el("button",{style:{background:"none",border:"none",color:"#555",cursor:"pointer",fontSize:"12px",marginBottom:"28px",padding:"0"},onClick:()=>s.setupStep==="info"?set({screen:"landing"}):set({setupStep:"info"})},"← 뒤로");
 
   if(s.setupStep==="info"){
-    const inp1=el("input",{className:"input",placeholder:"예) MRDW 무릉도원",value:s.bandName,style:{marginBottom:"16px"},onInput:e=>set({bandName:e.target.value})});
-    const inp2=el("input",{className:"input",placeholder:"예) 3월 합주",value:s.sessionTitle,onInput:e=>set({sessionTitle:e.target.value})});
+    const inp1=el("input",{className:"input",placeholder:"예) MRDW 무릉도원",value:s.bandName,style:{marginBottom:"16px"},onChange:e=>set({bandName:e.target.value}),onInput:e=>set({bandName:e.target.value})});
+    const inp2=el("input",{className:"input",placeholder:"예) 3월 합주",value:s.sessionTitle,onChange:e=>set({sessionTitle:e.target.value}),onInput:e=>set({sessionTitle:e.target.value})});
     const btn=el("button",{className:"btn",disabled:!(s.bandName.trim()&&s.sessionTitle.trim()),onClick:()=>set({setupStep:"calendar"})},"다음 — 날짜 선택");
     return el("div",{},back,
       el("div",{style:{fontSize:"10px",color:"#7c6af7",letterSpacing:".3em",marginBottom:"8px"}},"STEP 1"),
@@ -306,7 +312,7 @@ function renderLogin(){
   back.textContent="← 뒤로";
 
   if(s.loginStep==="name"){
-    const inp=el("input",{className:"input",placeholder:"예) 이지구",value:s.myName,onInput:e=>set({myName:e.target.value})});
+    const inp=el("input",{className:"input",placeholder:"예) 이지구",value:s.myName,onChange:e=>set({myName:e.target.value}),onInput:e=>set({myName:e.target.value})});
     return el("div",{},back,logo(),
       s.roomInfo?el("div",{style:{fontSize:"11px",color:"#555",margin:"8px 0 20px"}},s.roomInfo.band_name+" · "+s.roomInfo.session_title):null,
       el("h2",{style:{fontSize:"22px",fontWeight:"bold",margin:"0 0 4px"}},"이름을 알려줘"),
@@ -426,6 +432,10 @@ function renderApp(){
 
 function render(){
   const root=document.getElementById("root");
+  // 한글 입력 중에는 re-render 스킵
+  const active = document.activeElement;
+  const isComposing = active && active._composing;
+  if(isComposing) return;
   root.innerHTML="";
   const s=state;
   let content;
