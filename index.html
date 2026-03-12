@@ -3,63 +3,75 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-  <title>합간</title>
+  <title>합간 — 합주를 간단히</title>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{background:#0a0a0a;color:#e8e8e8;font-family:'Courier New',monospace;min-height:100vh}
-    #root{max-width:480px;margin:0 auto;padding:28px 20px 60px}
+    .bg{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 20% 50%,#1a0a2e 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,#0a1a2e 0%,transparent 50%)}
+    .wrap{position:relative;z-index:1;max-width:480px;margin:0 auto;padding:28px 20px 60px;min-height:100vh}
     input,button{font-family:'Courier New',monospace}
-    .btn{width:100%;padding:14px;margin-top:10px;background:#7c6af7;border:none;border-radius:12px;cursor:pointer;color:#fff;font-size:12px;letter-spacing:.2em;text-transform:uppercase}
-    .btn:disabled{background:#1a1a1a;border:1px solid #2a2a2a;color:#333;cursor:default}
-    .input{width:100%;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:12px 14px;color:#e8e8e8;font-size:13px;outline:none}
     .card{background:#111;border:1px solid #1e1e1e;border-radius:14px;padding:18px 20px;margin-bottom:12px}
     .label{font-size:10px;color:#555;letter-spacing:.25em;text-transform:uppercase;margin-bottom:6px;display:block}
-    .tabs{display:flex;border-bottom:1px solid #1e1e1e;margin-bottom:24px}
-    .tab{flex:1;background:none;border:none;border-bottom:2px solid transparent;padding:8px 0 12px;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#333;cursor:pointer}
+    .inp{width:100%;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:12px 14px;color:#e8e8e8;font-size:13px;outline:none;box-sizing:border-box;font-family:'Courier New',monospace}
+    .btn{width:100%;padding:14px;margin-top:10px;background:#7c6af7;border:none;border-radius:12px;cursor:pointer;color:#fff;font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-family:'Courier New',monospace;transition:all .2s}
+    .btn.off{background:#1a1a1a;border:1px solid #2a2a2a;color:#333;cursor:default}
+    .btn.ghost{background:#1a1a1a;border:1px solid #2a2a2a;color:#555}
+    .tabs{display:flex;margin-bottom:24px;border-bottom:1px solid #1e1e1e}
+    .tab{background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;padding:8px 16px 12px;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#333;font-family:'Courier New',monospace}
     .tab.on{color:#7c6af7;border-bottom-color:#7c6af7}
     .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
-    .role-btn{padding:12px 0;border-radius:10px;border:1px solid #2a2a2a;background:#1a1a1a;color:#555;cursor:pointer;font-size:12px}
+    .role-btn{padding:12px 0;border-radius:10px;border:1px solid #2a2a2a;background:#1a1a1a;color:#555;cursor:pointer;font-size:12px;font-family:'Courier New',monospace}
     .role-btn.on{border-color:#7c6af7;background:#7c6af722;color:#7c6af7}
     .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
-    .cal-day{aspect-ratio:1;border-radius:8px;border:none;background:transparent;color:#e8e8e8;cursor:pointer;font-size:12px}
+    .cal-hd{text-align:center;font-size:10px;padding:4px 0}
+    .cal-day{aspect-ratio:1;border-radius:8px;border:none;background:transparent;color:#e8e8e8;cursor:pointer;font-size:12px;font-family:'Courier New',monospace}
     .cal-day.sel{background:#7c6af7;color:#fff;font-weight:bold}
     .cal-day.past{color:#222;cursor:default}
     .cal-day.sun{color:#f87171}.cal-day.sat{color:#9b8ff7}
-    .status-row{display:flex;gap:8px;margin-top:12px}
-    .status-btn{flex:1;padding:9px 0;border-radius:8px;border:1px solid #2a2a2a;background:#1a1a1a;color:#444;cursor:pointer;font-size:11px}
-    .modal-bg{position:fixed;inset:0;background:#000c;z-index:100;display:flex;align-items:flex-end}
-    .modal{background:#111;border-radius:20px 20px 0 0;padding:28px 24px 48px;width:100%;border:1px solid #222}
+    .modal-bg{position:fixed;inset:0;background:#000000dd;z-index:200;display:flex;align-items:flex-end}
+    .modal{background:#111;border-radius:20px 20px 0 0;padding:28px 24px 48px;width:100%;max-width:480px;margin:0 auto;border:1px solid #222}
+    .wheel-wrap{position:relative;overflow:hidden}
+    .wheel-scroll{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none}
+    .wheel-scroll::-webkit-scrollbar{display:none}
+    .wheel-item{display:flex;align-items:center;justify-content:center;scroll-snap-align:start;cursor:pointer;font-size:15px;color:#444;font-family:'Courier New',monospace}
+    .wheel-item.on{color:#e8e8e8;font-weight:bold}
     .dur-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
-    .dur-btn{padding:7px 14px;border-radius:8px;border:1px solid #2a2a2a;background:#1a1a1a;color:#444;cursor:pointer;font-size:12px}
+    .dur-btn{padding:7px 12px;border-radius:8px;border:1px solid #2a2a2a;background:#1a1a1a;color:#444;cursor:pointer;font-size:12px;font-family:'Courier New',monospace}
     .dur-btn.on{border-color:#7c6af7;background:#7c6af722;color:#7c6af7}
+    .status-row{display:flex;gap:8px;margin-top:12px}
+    .status-btn{flex:1;padding:9px 0;border-radius:8px;border:1px solid #2a2a2a;background:#1a1a1a;color:#444;cursor:pointer;font-size:11px;font-family:'Courier New',monospace}
+    .prog{display:flex;gap:6px;margin-bottom:28px}
+    .prog-bar{flex:1;height:3px;border-radius:2px;background:#1e1e1e;transition:background .3s}
+    .prog-bar.on{background:#7c6af7}
     .err{font-size:11px;color:#f87171;margin:8px 0}
-    .logo span:first-child{color:#7c6af7}
     @keyframes spin{to{transform:rotate(360deg)}}
-    .spinner{width:28px;height:28px;border:2px solid #1e1e1e;border-top-color:#7c6af7;border-radius:50%;animation:spin .8s linear infinite;margin:80px auto}
+    .spinner{width:32px;height:32px;border:2px solid #1e1e1e;border-top-color:#7c6af7;border-radius:50%;animation:spin .8s linear infinite;margin:80px auto}
   </style>
 </head>
 <body>
-<div id="root"></div>
+<div class="bg"></div>
+<div id="root" class="wrap"></div>
 <script>
-// ── Supabase
 const SB_URL = "https://tjjhkddtfyoyshgtlvsl.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqamhrZGR0ZnlveXNoZ3RsdnNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyODgxNzUsImV4cCI6MjA4ODg2NDE3NX0.ivy7wL_0xBqGynZZrS4MrIkPMQT15pPGMrnu0OJUb9Q";
+
 async function sb(path, o={}) {
   const h = {"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json","Accept":"application/json"};
-  if(o.prefer||o.method) h["Prefer"]=o.prefer||"return=representation";
+  if(o.method) h["Prefer"] = o.prefer||"return=representation";
   const r = await fetch(SB_URL+"/rest/v1/"+path,{method:o.method||"GET",headers:h,body:o.body});
-  if(!r.ok) throw new Error((await r.text()));
+  if(!r.ok) throw new Error(await r.text());
   const t=await r.text(); return t?JSON.parse(t):null;
 }
 
-// ── 상수
 const ROLES=["보컬","기타","베이스","드럼","키보드","세션","기타(other)"];
 const EMO={"보컬":"🎤","기타":"🎸","베이스":"🎵","드럼":"🥁","키보드":"🎹","세션":"🎙️","기타(other)":"🎶"};
 const DAYS=["일","월","화","수","목","금","토"];
 const MONTHS=["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
+const HOURS=Array.from({length:16},(_,i)=>i+8);
+const MINS=["00","15","30","45"];
+const DURS=[1,1.5,2,2.5,3,3.5,4];
 const SC={"ok":"#4ade80","maybe":"#facc15","no":"#f87171"};
 const SL={"ok":"됨","maybe":"애매","no":"안됨"};
-const DURS=[1,1.5,2,2.5,3,3.5,4];
 
 function pad(n){return String(n).padStart(2,"0")}
 function dkey(d){return d.y+"-"+d.m+"-"+d.d}
@@ -71,23 +83,26 @@ function fmtTime(t){
 }
 function genId(){return Math.random().toString(36).slice(2,8).toUpperCase()}
 
-// ── 상태
-let state = {
+// ── 앱 상태
+let S = {
   screen:"landing", loading:false, error:null,
-  bandName:"", sessionTitle:"", setupStep:"info",
-  selDates:[], dtMap:{}, timeModalDate:null, roomId:null,
+  bandName:"", sessionTitle:"",
+  setupStep:"info", selDates:[], dtMap:{}, timeModal:null,
+  tH:14, tM:"00", tDur:2,
+  calY:new Date().getFullYear(), calM:new Date().getMonth(),
+  roomId:null, roomInfo:null,
   loginStep:"name", myName:"", myRole:"",
   dates:[], votes:{}, myVotes:{}, confirmed:null,
-  view:"vote", roomInfo:null, inviteCopied:false, submitted:false,
-  timeHour:14, timeMin:"00", timeDur:2,
+  view:"vote", submitted:false, inviteCopied:false,
 };
 
-function set(patch){state={...state,...patch};render()}
-
-// 초기화: URL 해시 확인
+// URL 해시 체크
 const hash=location.hash.replace("#","");
-if(hash){state.roomId=hash;state.screen="login";}
+if(hash){S.roomId=hash;S.screen="login";}
 
+function set(patch){Object.assign(S,patch);render()}
+
+// ── Supabase
 async function loadRoom(rid){
   set({loading:true,error:null});
   try{
@@ -107,11 +122,9 @@ async function createRoom(){
   set({loading:true,error:null});
   try{
     const id=genId();
-    await sb("rooms",{method:"POST",body:JSON.stringify({id,band_name:state.bandName,session_title:state.sessionTitle})});
-    const sorted=[...state.selDates].sort((a,b)=>new Date(a.y,a.m,a.d)-new Date(b.y,b.m,b.d));
-    for(const d of sorted){
-      const t=state.dtMap[dkey(d)];
-      await sb("dates",{method:"POST",body:JSON.stringify({room_id:id,date:fmtDate(d.y,d.m,d.d),time:fmtTime(t)})});
+    await sb("rooms",{method:"POST",body:JSON.stringify({id,band_name:S.bandName,session_title:S.sessionTitle})});
+    for(const d of [...S.selDates].sort((a,b)=>new Date(a.y,a.m,a.d)-new Date(b.y,b.m,b.d))){
+      await sb("dates",{method:"POST",body:JSON.stringify({room_id:id,date:fmtDate(d.y,d.m,d.d),time:fmtTime(S.dtMap[dkey(d)])})});
     }
     location.hash=id;
     await loadRoom(id);
@@ -122,335 +135,433 @@ async function createRoom(){
 async function submitVote(){
   set({loading:true,error:null});
   try{
-    for(const [did,status] of Object.entries(state.myVotes)){
-      const ex=await sb("votes?room_id=eq."+state.roomId+"&date_id=eq."+did+"&member_name=eq."+encodeURIComponent(state.myName)+"&select=id");
+    for(const [did,status] of Object.entries(S.myVotes)){
+      const ex=await sb("votes?room_id=eq."+S.roomId+"&date_id=eq."+did+"&member_name=eq."+encodeURIComponent(S.myName)+"&select=id");
       if(ex&&ex.length){
         await sb("votes?id=eq."+ex[0].id,{method:"PATCH",prefer:"return=minimal",body:JSON.stringify({status})});
       }else{
-        await sb("votes",{method:"POST",body:JSON.stringify({room_id:state.roomId,date_id:parseInt(did),member_name:state.myName,member_role:state.myRole,status})});
+        await sb("votes",{method:"POST",body:JSON.stringify({room_id:S.roomId,date_id:parseInt(did),member_name:S.myName,member_role:S.myRole,status})});
       }
     }
-    const nv={...state.votes,[state.myName]:{...state.myVotes}};
-    set({loading:false,votes:nv,submitted:true,view:"result"});
+    set({loading:false,votes:{...S.votes,[S.myName]:{...S.myVotes}},submitted:true,view:"result"});
   }catch(e){set({loading:false,error:"투표 실패: "+e.message});}
 }
 
 function toggleDate(d){
-  const exists=state.selDates.find(s=>s.y===d.y&&s.m===d.m&&s.d===d.d);
+  const exists=S.selDates.find(s=>s.y===d.y&&s.m===d.m&&s.d===d.d);
   if(exists){
-    const dm={...state.dtMap}; delete dm[dkey(d)];
-    set({selDates:state.selDates.filter(s=>!(s.y===d.y&&s.m===d.m&&s.d===d.d)),dtMap:dm});
+    const dm={...S.dtMap}; delete dm[dkey(d)];
+    set({selDates:S.selDates.filter(s=>!(s.y===d.y&&s.m===d.m&&s.d===d.d)),dtMap:dm});
   }else{
-    set({selDates:[...state.selDates,d],timeModalDate:d,timeHour:14,timeMin:"00",timeDur:2});
+    set({selDates:[...S.selDates,d],timeModal:d,tH:14,tM:"00",tDur:2});
   }
 }
 
-function scoreFor(dateId){return Object.values(state.votes).filter(v=>v[dateId]==="ok").length;}
+function scoreFor(did){return Object.values(S.votes).filter(v=>v[did]==="ok").length}
 
-// ── 렌더링
-function el(tag,attrs,...children){
+// ── DOM 헬퍼
+function div(attrs,children){return el("div",attrs,children)}
+function el(tag,attrs,children){
   const e=document.createElement(tag);
   for(const [k,v] of Object.entries(attrs||{})){
-    if(k==="style"&&typeof v==="object") Object.assign(e.style,v);
-    else if(k.startsWith("on")) e.addEventListener(k.slice(2).toLowerCase(),v);
-    if(tag==="input"||tag==="textarea"){
-      e.addEventListener("compositionstart",()=>e._composing=true);
-      e.addEventListener("compositionend",()=>{e._composing=false; e.dispatchEvent(new Event("input"));});
-    }
-    else if(k==="className") e.className=v;
-    else if(k==="value"&&(tag==="input"||tag==="textarea")) {
-      if(e.value !== v) e.value=v;
-    }
-    else if(k==="placeholder") e.placeholder=v;
-    else if(k==="disabled") e.disabled=v;
-    else if(k==="type") e.type=v;
-    else e.setAttribute(k,v);
+    if(k==="class") e.className=v;
+    else if(k==="style") Object.assign(e.style,v);
+    else if(k[0]==="o"&&k[1]==="n") e.addEventListener(k.slice(2),v);
+    else e[k]=v;
   }
-  for(const c of children.flat()){
-    if(c==null||c===false) continue;
-    e.appendChild(typeof c==="string"||typeof c==="number"?document.createTextNode(c):c);
+  if(children){
+    const arr=Array.isArray(children)?children:[children];
+    for(const c of arr.flat(9)){
+      if(c==null||c===false||c===undefined) continue;
+      e.appendChild(typeof c==="object"?c:document.createTextNode(String(c)));
+    }
   }
   return e;
 }
 
-function logo(size=14){
-  const d=el("div",{style:{fontSize:size,fontWeight:900,letterSpacing:"-.02em"}});
-  d.appendChild(el("span",{style:{color:"#7c6af7"}},"합"));
-  d.appendChild(el("span",{style:{color:"#e8e8e8"}},"간"));
-  return d;
+function logo(size){
+  return div({style:{fontSize:(size||14)+"px",fontWeight:900,letterSpacing:"-.02em",marginBottom:"4px"}},[
+    el("span",{style:{color:"#7c6af7"}},"합"),
+    el("span",{style:{color:"#e8e8e8"}},"간"),
+  ]);
+}
+
+function btn(label,onClick,active,color){
+  const b=el("button",{class:"btn"+(active===false?" off":""),onclick:onClick},label);
+  if(color) b.style.background=color;
+  return b;
+}
+
+function backBtn(onClick){
+  return el("button",{style:{background:"none",border:"none",color:"#555",cursor:"pointer",fontSize:"12px",letterSpacing:".1em",marginBottom:"28px",padding:"0"},onclick:onClick},"← 뒤로");
+}
+
+// ── 휠 피커 (DOM 직접)
+function makeWheel(items,selected,onSelect,width){
+  const IH=40;
+  const wrap=div({class:"wheel-wrap",style:{width:(width||72)+"px",height:(IH*5)+"px"}});
+  const hl=div({style:{position:"absolute",top:(IH*2)+"px",left:"0",right:"0",height:IH+"px",background:"#7c6af722",borderTop:"1px solid #7c6af755",borderBottom:"1px solid #7c6af755",pointerEvents:"none",zIndex:"2",borderRadius:"8px"}});
+  const ft=div({style:{position:"absolute",top:"0",left:"0",right:"0",height:(IH*2)+"px",background:"linear-gradient(to bottom,#111,transparent)",pointerEvents:"none",zIndex:"3"}});
+  const fb=div({style:{position:"absolute",bottom:"0",left:"0",right:"0",height:(IH*2)+"px",background:"linear-gradient(to top,#111,transparent)",pointerEvents:"none",zIndex:"3"}});
+  const scroll=div({class:"wheel-scroll",style:{height:"100%"}});
+  scroll.appendChild(div({style:{height:IH+"px"}}));
+  scroll.appendChild(div({style:{height:IH+"px"}}));
+  items.forEach((item,i)=>{
+    const it=div({class:"wheel-item"+(item===selected?" on":""),style:{height:IH+"px"}},String(item));
+    it.addEventListener("click",()=>{onSelect(item);scroll.scrollTop=i*IH;});
+    scroll.appendChild(it);
+  });
+  scroll.appendChild(div({style:{height:IH+"px"}}));
+  scroll.appendChild(div({style:{height:IH+"px"}}));
+  scroll.addEventListener("scroll",()=>{
+    const i=Math.max(0,Math.min(items.length-1,Math.round(scroll.scrollTop/IH)));
+    if(items[i]!==selected){selected=items[i];onSelect(items[i]);}
+    scroll.querySelectorAll(".wheel-item").forEach((it,j)=>{
+      it.className="wheel-item"+(items[j]===selected?" on":"");
+    });
+  });
+  setTimeout(()=>{scroll.scrollTop=items.indexOf(selected)*IH;},0);
+  wrap.append(hl,ft,fb,scroll);
+  return wrap;
+}
+
+// ── 시간 모달
+function makeTimeModal(d){
+  let h=S.tH,m=S.tM,dur=S.tDur;
+  function previewStr(){
+    const em=h*60+parseInt(m)+dur*60;
+    return pad(h)+":"+m+" → "+pad(Math.floor(em/60)%24)+":"+pad(em%60);
+  }
+  const preview=div({style:{background:"#1a1a1a",borderRadius:"10px",padding:"12px 16px",textAlign:"center",marginBottom:"20px"}});
+  function updatePreview(){
+    preview.innerHTML="";
+    preview.appendChild(div({style:{fontSize:"11px",color:"#555",marginBottom:"4px"}},"합주 시간"));
+    preview.appendChild(div({style:{fontSize:"18px",fontWeight:"bold",color:"#e8e8e8",letterSpacing:".05em"}},previewStr()+" ("+dur+"시간)"));
+  }
+  updatePreview();
+
+  const hourWheel=makeWheel(HOURS,h,(v)=>{h=v;updatePreview();},72);
+  const minWheel=makeWheel(MINS,m,(v)=>{m=v;updatePreview();},72);
+
+  const durRow=div({class:"dur-row"});
+  DURS.forEach(dv=>{
+    const b=el("button",{class:"dur-btn"+(dur===dv?" on":""),onclick:()=>{
+      dur=dv;
+      durRow.querySelectorAll(".dur-btn").forEach((bb,i)=>bb.className="dur-btn"+(DURS[i]===dv?" on":""));
+      updatePreview();
+    }},dv+"시간");
+    durRow.appendChild(b);
+  });
+
+  const modal=div({class:"modal"},[
+    div({style:{fontSize:"11px",color:"#555",marginBottom:"4px"}},fmtDate(d.y,d.m,d.d)),
+    div({style:{fontSize:"16px",fontWeight:"bold",marginBottom:"20px"}},"시간 설정"),
+    div({style:{fontSize:"10px",color:"#555",letterSpacing:".2em",marginBottom:"10px"}},"시작 시간"),
+    div({style:{display:"flex",justifyContent:"center",alignItems:"center",gap:"8px",marginBottom:"20px"}},[hourWheel,div({style:{fontSize:"20px",color:"#333"}},":"),minWheel]),
+    div({style:{fontSize:"10px",color:"#555",letterSpacing:".2em",marginBottom:"10px"}},"합주 시간"),
+    durRow,preview,
+    btn("확인",()=>{
+      const dm={...S.dtMap,[dkey(d)]:{h,m,dur}};
+      set({dtMap:dm,timeModal:null,tH:h,tM:m,tDur:dur});
+    }),
+  ]);
+  const bg=div({class:"modal-bg"});
+  bg.addEventListener("click",()=>set({timeModal:null}));
+  modal.addEventListener("click",e=>e.stopPropagation());
+  bg.appendChild(modal);
+  return bg;
+}
+
+// ── 캘린더
+function makeCalendar(){
+  let cy=S.calY, cm=S.calM;
+  function build(){
+    const dim=new Date(cy,cm+1,0).getDate();
+    const fd=new Date(cy,cm,1).getDay();
+    const cells=[...Array(fd).fill(null),...Array.from({length:dim},(_,i)=>i+1)];
+    const wrap=div({});
+    wrap.appendChild(div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"16px"}},[
+      el("button",{style:{background:"none",border:"none",color:"#555",cursor:"pointer",fontSize:"20px",padding:"4px 10px"},onclick:()=>{
+        if(cm===0){cm=11;cy--;}else cm--;
+        set({calY:cy,calM:cm});
+      }},"‹"),
+      div({style:{fontSize:"14px",fontWeight:"bold"}},cy+"년 "+MONTHS[cm]),
+      el("button",{style:{background:"none",border:"none",color:"#555",cursor:"pointer",fontSize:"20px",padding:"4px 10px"},onclick:()=>{
+        if(cm===11){cm=0;cy++;}else cm++;
+        set({calY:cy,calM:cm});
+      }},"›"),
+    ]));
+    const hdr=div({class:"cal-grid"});
+    DAYS.forEach((d,i)=>{
+      const c=div({class:"cal-hd",style:{color:i===0?"#f87171":i===6?"#9b8ff7":"#444"}},d);
+      hdr.appendChild(c);
+    });
+    wrap.appendChild(hdr);
+    const grid=div({class:"cal-grid"});
+    cells.forEach((day,i)=>{
+      const dow=i%7;
+      const isPast=day&&(()=>{const dt=new Date(cy,cm,day);dt.setHours(0,0,0,0);const t=new Date();t.setHours(0,0,0,0);return dt<t;})();
+      const isSel=day&&S.selDates.some(s=>s.y===cy&&s.m===cm&&s.d===day);
+      let cls="cal-day";
+      if(isSel)cls+=" sel";else if(!day||isPast)cls+=" past";else if(dow===0)cls+=" sun";else if(dow===6)cls+=" sat";
+      const b=el("button",{class:cls},day||"");
+      if(day&&!isPast) b.addEventListener("click",()=>toggleDate({y:cy,m:cm,d:day}));
+      grid.appendChild(b);
+    });
+    wrap.appendChild(grid);
+    return wrap;
+  }
+  return build();
+}
+
+// ── 입력 필드 (한글 안전 버전)
+function makeInput(placeholder, initVal, onDone){
+  const inp=el("input",{class:"inp",placeholder,value:initVal||""});
+  // 한글 IME 안전: compositionend 후에만 state 업데이트
+  let composing=false;
+  inp.addEventListener("compositionstart",()=>composing=true);
+  inp.addEventListener("compositionend",()=>{composing=false;onDone(inp.value);});
+  inp.addEventListener("input",()=>{if(!composing)onDone(inp.value);});
+  return inp;
+}
+
+// ── 화면 렌더링
+function render(){
+  const root=document.getElementById("root");
+  // 포커스된 input이 있으면 값 저장 후 re-render
+  const focused=document.activeElement;
+  const focusedId=focused&&focused.dataset&&focused.dataset.id;
+
+  root.innerHTML="";
+  let content;
+  if(S.screen==="landing") content=renderLanding();
+  else if(S.screen==="setup") content=renderSetup();
+  else if(S.screen==="login") content=renderLogin();
+  else if(S.screen==="app") content=renderApp();
+  else content=div({style:{textAlign:"center"}},el("div",{class:"spinner"}));
+  root.appendChild(content);
+
+  // 시간 모달
+  if(S.timeModal){
+    root.appendChild(makeTimeModal(S.timeModal));
+  }
 }
 
 function renderLanding(){
-  return el("div",{style:{minHeight:"100vh",display:"flex",flexDirection:"column",justifyContent:"space-between",paddingTop:"44px"}},
-    el("div",{},
-      el("div",{style:{fontSize:"80px",fontWeight:900,lineHeight:.9,letterSpacing:"-.05em",marginBottom:"8px"}},
+  return div({style:{minHeight:"92vh",display:"flex",flexDirection:"column",justifyContent:"space-between",paddingTop:"44px"}},[
+    div({},[
+      div({style:{display:"flex",alignItems:"baseline",gap:"2px",marginBottom:"36px"}},[
+        el("span",{style:{fontSize:"11px",letterSpacing:".35em",color:"#7c6af7"}},"합"),
+        el("span",{style:{fontSize:"11px",letterSpacing:".35em",color:"#333"}},"주를\u00a0"),
+        el("span",{style:{fontSize:"11px",letterSpacing:".35em",color:"#7c6af7"}},"간"),
+        el("span",{style:{fontSize:"11px",letterSpacing:".35em",color:"#333"}},"단히"),
+      ]),
+      div({style:{fontSize:"88px",fontWeight:"900",lineHeight:".9",letterSpacing:"-.05em"}},[
         el("span",{style:{color:"#7c6af7"}},"합"),
-        el("span",{style:{color:"#e8e8e8"}},"간")
+        el("span",{style:{color:"#e8e8e8"}},"간"),
+      ]),
+      div({style:{color:"#333",fontSize:"12px",marginTop:"24px",lineHeight:"2.2",letterSpacing:".04em"}},"날짜 후보 등록 → 멤버 투표 → 합주 확정"),
+    ]),
+    div({style:{paddingBottom:"24px"}},[
+      ...[{i:"🗓️",t:"달력에서 날짜 후보 직접 선택"},{i:"🗳️",t:"됨 / 애매 / 안됨 투표"},{i:"✅",t:"최적 날짜 자동 추천 + 확정"}].map(x=>
+        div({style:{display:"flex",alignItems:"center",gap:"14px",marginBottom:"10px"}},[
+          el("span",{style:{fontSize:"15px"}},x.i),
+          el("span",{style:{fontSize:"12px",color:"#444"}},x.t),
+        ])
       ),
-      el("p",{style:{color:"#555",fontSize:"11px",letterSpacing:".3em"}},"합주를 간단히"),
-      el("p",{style:{color:"#333",fontSize:"12px",marginTop:"24px",lineHeight:"2.2"}},"날짜 후보 등록 → 멤버 투표 → 합주 확정")
-    ),
-    el("div",{style:{paddingBottom:"24px"}},
-      el("button",{className:"btn",style:{fontSize:"13px",padding:"18px",marginTop:"0"},onClick:()=>set({screen:"setup",setupStep:"info"})},"🎸 합주방 만들기")
-    )
-  );
+      btn("🎸 합주방 만들기",()=>set({screen:"setup",setupStep:"info"}),true),
+    ]),
+  ]);
 }
 
 function renderSetup(){
-  const s=state;
-  const back=el("button",{style:{background:"none",border:"none",color:"#555",cursor:"pointer",fontSize:"12px",marginBottom:"28px",padding:"0"},onClick:()=>s.setupStep==="info"?set({screen:"landing"}):set({setupStep:"info"})},"← 뒤로");
+  const back=backBtn(()=>S.setupStep==="info"?set({screen:"landing"}):set({setupStep:"info"}));
+  const prog=div({class:"prog"},[
+    div({class:"prog-bar on"}),
+    div({class:"prog-bar"+(S.setupStep==="calendar"?" on":"")}),
+  ]);
 
-  if(s.setupStep==="info"){
-    const inp1=el("input",{className:"input",placeholder:"예) MRDW 무릉도원",value:s.bandName,style:{marginBottom:"16px"},onChange:e=>set({bandName:e.target.value}),onInput:e=>set({bandName:e.target.value})});
-    const inp2=el("input",{className:"input",placeholder:"예) 3월 합주",value:s.sessionTitle,onChange:e=>set({sessionTitle:e.target.value}),onInput:e=>set({sessionTitle:e.target.value})});
-    const btn=el("button",{className:"btn",disabled:!(s.bandName.trim()&&s.sessionTitle.trim()),onClick:()=>set({setupStep:"calendar"})},"다음 — 날짜 선택");
-    return el("div",{},back,
-      el("div",{style:{fontSize:"10px",color:"#7c6af7",letterSpacing:".3em",marginBottom:"8px"}},"STEP 1"),
-      el("h2",{style:{fontSize:"22px",fontWeight:"bold",margin:"0 0 24px"}},"밴드 정보"),
-      el("span",{className:"label"},"밴드 이름"),inp1,
-      el("span",{className:"label"},"합주 이름"),inp2,btn
-    );
+  if(S.setupStep==="info"){
+    const inp1=makeInput("예) MRDW 무릉도원",S.bandName,v=>{ S.bandName=v; });
+    const inp2=makeInput("예) 3월 합주",S.sessionTitle,v=>{ S.sessionTitle=v; });
+    const nextBtn=btn("다음 — 날짜 선택",()=>{
+      S.bandName=inp1.value; S.sessionTitle=inp2.value;
+      if(S.bandName.trim()&&S.sessionTitle.trim()) set({setupStep:"calendar"});
+    },true);
+    return div({},[back,prog,
+      div({style:{fontSize:"10px",color:"#7c6af7",letterSpacing:".3em",marginBottom:"8px"}},"STEP 1"),
+      el("h2",{style:{fontSize:"22px",fontWeight:"bold",margin:"0 0 4px"}},"밴드 정보"),
+      el("p",{style:{color:"#444",fontSize:"12px",marginBottom:"28px"}},"합주방을 만들어보자"),
+      el("span",{class:"label"},"밴드 이름"),inp1,
+      div({style:{marginBottom:"16px"}}),
+      el("span",{class:"label"},"합주 이름"),inp2,
+      nextBtn,
+    ]);
   }
 
   // calendar step
-  const today=new Date();
-  let cy=s._cy||today.getFullYear(), cm=s._cm||today.getMonth();
-  const dim=new Date(cy,cm+1,0).getDate();
-  const fd=new Date(cy,cm,1).getDay();
-  const cells=[...Array(fd).fill(null),...Array.from({length:dim},(_,i)=>i+1)];
+  const selList=S.selDates.length?div({style:{marginBottom:"12px"}},[
+    el("span",{class:"label"},"선택됨 "+S.selDates.length+"개"),
+    ...[...S.selDates].sort((a,b)=>new Date(a.y,a.m,a.d)-new Date(b.y,b.m,b.d)).map(d=>{
+      const t=S.dtMap[dkey(d)];
+      return div({style:{display:"flex",alignItems:"center",gap:"8px",background:"#1a1a1a",border:"1px solid "+(t?"#7c6af733":"#f8717133"),borderRadius:"10px",padding:"10px 14px",marginBottom:"6px"}},[
+        div({style:{flex:"1"}},[
+          div({style:{fontSize:"12px",color:"#aaa"}},fmtDate(d.y,d.m,d.d)),
+          div({style:{fontSize:"11px",color:t?"#7c6af7":"#f87171",marginTop:"2px"}},t?fmtTime(t):"⚠ 시간 미설정 — 탭해서 설정"),
+        ]),
+        el("button",{style:{background:"none",border:"1px solid #2a2a2a",borderRadius:"6px",color:"#555",cursor:"pointer",fontSize:"10px",padding:"4px 8px"},onclick:()=>set({timeModal:d,tH:t?t.h:14,tM:t?t.m:"00",tDur:t?t.dur:2})},"수정"),
+        el("button",{style:{background:"none",border:"none",color:"#444",cursor:"pointer",fontSize:"16px",padding:"0"},onclick:()=>toggleDate(d)},"×"),
+      ]);
+    }),
+  ]):null;
 
-  const calDays=el("div",{className:"cal-grid"},
-    ...DAYS.map((d,i)=>el("div",{style:{textAlign:"center",fontSize:"10px",color:i===0?"#f87171":i===6?"#9b8ff7":"#444",padding:"4px 0"}},d))
-  );
-  const calCells=el("div",{className:"cal-grid"},
-    ...cells.map((day,i)=>{
-      const dow=i%7;
-      const isPast=day&&(()=>{const dt=new Date(cy,cm,day);dt.setHours(0,0,0,0);const t=new Date();t.setHours(0,0,0,0);return dt<t;})();
-      const isSel=day&&s.selDates.some(sd=>sd.y===cy&&sd.m===cm&&sd.d===day);
-      let cls="cal-day";
-      if(isSel)cls+=" sel";else if(!day||isPast)cls+=" past";else if(dow===0)cls+=" sun";else if(dow===6)cls+=" sat";
-      return el("button",{className:cls,onClick:()=>!isPast&&day&&toggleDate({y:cy,m:cm,d:day})},day||"");
-    })
-  );
+  const allReady=S.selDates.length>0&&S.selDates.every(d=>S.dtMap[dkey(d)]);
+  const createBtn=btn(S.loading?"만드는 중...":"완료 — 합주방 만들기 🎸",()=>{if(allReady&&!S.loading)createRoom();},allReady&&!S.loading);
+  const errEl=S.error?div({class:"err"},S.error):null;
 
-  const selList=s.selDates.length?el("div",{style:{marginBottom:"12px"}},
-    el("span",{className:"label"},"선택됨 "+s.selDates.length+"개"),
-    ...[...s.selDates].sort((a,b)=>new Date(a.y,a.m,a.d)-new Date(b.y,b.m,b.d)).map(d=>{
-      const t=s.dtMap[dkey(d)];
-      return el("div",{style:{display:"flex",alignItems:"center",gap:"8px",background:"#1a1a1a",border:"1px solid "+(t?"#7c6af733":"#f8717133"),borderRadius:"10px",padding:"10px 14px",marginBottom:"6px"}},
-        el("div",{style:{flex:1}},
-          el("div",{style:{fontSize:"12px",color:"#aaa"}},fmtDate(d.y,d.m,d.d)),
-          el("div",{style:{fontSize:"11px",color:t?"#7c6af7":"#f87171",marginTop:"2px"}},t?fmtTime(t):"⚠ 시간 미설정")
-        ),
-        el("button",{style:{background:"none",border:"1px solid #2a2a2a",borderRadius:"6px",color:"#555",cursor:"pointer",fontSize:"10px",padding:"4px 8px"},onClick:()=>set({timeModalDate:d,timeHour:t?t.h:14,timeMin:t?t.m:"00",timeDur:t?t.dur:2})},"수정"),
-        el("button",{style:{background:"none",border:"none",color:"#444",cursor:"pointer",fontSize:"16px",padding:"0"},onClick:()=>toggleDate(d)},"×")
-      );
-    })
-  ):null;
-
-  const allReady=s.selDates.length>0&&s.selDates.every(d=>s.dtMap[dkey(d)]);
-  const createBtn=el("button",{className:"btn",disabled:!allReady||s.loading,onClick:createRoom},s.loading?"만드는 중...":"완료 — 합주방 만들기 🎸");
-
-  const modal=s.timeModalDate?renderTimeModal():null;
-
-  return el("div",{},back,
-    el("div",{style:{fontSize:"10px",color:"#7c6af7",letterSpacing:".3em",marginBottom:"8px"}},"STEP 2"),
+  return div({},[back,prog,
+    div({style:{fontSize:"10px",color:"#7c6af7",letterSpacing:".3em",marginBottom:"8px"}},"STEP 2"),
     el("h2",{style:{fontSize:"22px",fontWeight:"bold",margin:"0 0 4px"}},"날짜 + 시간 선택"),
     el("p",{style:{color:"#444",fontSize:"12px",marginBottom:"20px"}},"날짜 누르면 시간도 바로 설정돼"),
-    el("div",{className:"card"},
-      el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"16px"}},
-        el("button",{style:{background:"none",border:"none",color:"#555",cursor:"pointer",fontSize:"20px",padding:"4px 10px"},onClick:()=>set({_cm:cm===0?11:cm-1,_cy:cm===0?cy-1:cy})},"‹"),
-        el("span",{style:{fontSize:"14px",fontWeight:"bold"}},cy+"년 "+MONTHS[cm]),
-        el("button",{style:{background:"none",border:"none",color:"#555",cursor:"pointer",fontSize:"20px",padding:"4px 10px"},onClick:()=>set({_cm:cm===11?0:cm+1,_cy:cm===11?cy+1:cy})},"›")
-      ),
-      calDays,calCells
-    ),
-    selList,
-    s.error?el("div",{className:"err"},s.error):null,
-    createBtn,
-    modal
-  );
-}
-
-function renderTimeModal(){
-  const s=state;
-  const d=s.timeModalDate;
-  if(!d) return null;
-  const em=s.timeHour*60+parseInt(s.timeMin)+s.timeDur*60;
-  const preview=pad(s.timeHour)+":"+s.timeMin+" → "+pad(Math.floor(em/60)%24)+":"+pad(em%60)+" ("+s.timeDur+"시간)";
-
-  const hourSel=el("select",{style:{background:"#1a1a1a",border:"1px solid #2a2a2a",borderRadius:"8px",color:"#e8e8e8",padding:"8px 12px",fontSize:"16px"},onChange:e=>set({timeHour:parseInt(e.target.value)})},
-    ...Array.from({length:16},(_,i)=>i+8).map(h=>{ const o=el("option",{value:h},pad(h)+"시"); if(h===s.timeHour)o.selected=true; return o; })
-  );
-  const minSel=el("select",{style:{background:"#1a1a1a",border:"1px solid #2a2a2a",borderRadius:"8px",color:"#e8e8e8",padding:"8px 12px",fontSize:"16px"},onChange:e=>set({timeMin:e.target.value})},
-    ...["00","15","30","45"].map(m=>{ const o=el("option",{value:m},m+"분"); if(m===s.timeMin)o.selected=true; return o; })
-  );
-
-  return el("div",{className:"modal-bg",onClick:()=>set({timeModalDate:null})},
-    el("div",{className:"modal",onClick:e=>e.stopPropagation()},
-      el("div",{style:{fontSize:"11px",color:"#555",marginBottom:"4px"}},fmtDate(d.y,d.m,d.d)),
-      el("div",{style:{fontSize:"16px",fontWeight:"bold",marginBottom:"20px"}},"시간 설정"),
-      el("div",{style:{fontSize:"10px",color:"#555",letterSpacing:".2em",marginBottom:"10px"}},"시작 시간"),
-      el("div",{style:{display:"flex",gap:"12px",marginBottom:"20px",justifyContent:"center"}},hourSel,minSel),
-      el("div",{style:{fontSize:"10px",color:"#555",letterSpacing:".2em",marginBottom:"10px"}},"합주 시간"),
-      el("div",{className:"dur-row"},
-        ...DURS.map(dur=>el("button",{className:"dur-btn"+(s.timeDur===dur?" on":""),onClick:()=>set({timeDur:dur})},dur+"시간"))
-      ),
-      el("div",{style:{background:"#1a1a1a",borderRadius:"10px",padding:"12px",textAlign:"center",marginBottom:"20px",fontSize:"16px",fontWeight:"bold"}},preview),
-      el("button",{className:"btn",style:{marginTop:"0"},onClick:()=>{
-        const dm={...s.dtMap,[dkey(d)]:{h:s.timeHour,m:s.timeMin,dur:s.timeDur}};
-        set({dtMap:dm,timeModalDate:null});
-      }},"확인")
-    )
-  );
+    div({class:"card"},makeCalendar()),
+    selList,errEl,createBtn,
+  ]);
 }
 
 function renderLogin(){
-  const s=state;
-  if(s.loading) return el("div",{},el("div",{className:"spinner"}));
-  const back=el("button",{style:{background:"none",border:"none",color:"#555",cursor:"pointer",fontSize:"12px",marginBottom:"28px",padding:"0"},onClick:()=>{set({screen:"landing"});location.hash="";}});
-  back.textContent="← 뒤로";
+  if(S.loading) return div({style:{textAlign:"center"}},el("div",{class:"spinner"}));
+  const back=backBtn(()=>{set({screen:"landing"});location.hash="";});
 
-  if(s.loginStep==="name"){
-    const inp=el("input",{className:"input",placeholder:"예) 이지구",value:s.myName,onChange:e=>set({myName:e.target.value}),onInput:e=>set({myName:e.target.value})});
-    return el("div",{},back,logo(),
-      s.roomInfo?el("div",{style:{fontSize:"11px",color:"#555",margin:"8px 0 20px"}},s.roomInfo.band_name+" · "+s.roomInfo.session_title):null,
-      el("h2",{style:{fontSize:"22px",fontWeight:"bold",margin:"0 0 4px"}},"이름을 알려줘"),
+  if(S.loginStep==="name"){
+    const inp=makeInput("예) 이지구",S.myName,v=>{ S.myName=v; });
+    const nextBtn=btn("다음",()=>{S.myName=inp.value.trim();if(S.myName)set({loginStep:"role"});},true);
+    return div({},[back,logo(),
+      S.roomInfo?div({style:{fontSize:"11px",color:"#555",margin:"8px 0 20px"}},S.roomInfo.band_name+" · "+S.roomInfo.session_title):null,
+      el("h2",{style:{fontSize:"22px",fontWeight:"bold",margin:"16px 0 4px"}},"이름을 알려줘"),
       el("p",{style:{color:"#444",fontSize:"12px",marginBottom:"28px"}},"합주 일정에 참여하려면 이름이 필요해"),
-      el("span",{className:"label"},"이름"),inp,
-      el("button",{className:"btn",disabled:!s.myName.trim(),onClick:()=>s.myName.trim()&&set({loginStep:"role"})},"다음")
-    );
+      el("span",{class:"label"},"이름"),inp,nextBtn,
+    ]);
   }
 
-  return el("div",{},back,logo(),
+  return div({},[back,logo(),
     el("h2",{style:{fontSize:"22px",fontWeight:"bold",margin:"16px 0 4px"}},"포지션은?"),
     el("p",{style:{color:"#444",fontSize:"12px",marginBottom:"28px"}},"밴드에서 어떤 파트야?"),
-    el("div",{className:"role-grid"},
-      ...ROLES.map(r=>el("button",{className:"role-btn"+(s.myRole===r?" on":""),onClick:()=>set({myRole:r})},EMO[r]+" "+r))
-    ),
-    el("button",{className:"btn",disabled:!s.myRole,onClick:async()=>{if(s.myRole){await loadRoom(s.roomId);set({screen:"app"});}}},"참여하기")
-  );
+    div({class:"role-grid"},ROLES.map(r=>el("button",{class:"role-btn"+(S.myRole===r?" on":""),onclick:()=>set({myRole:r})},EMO[r]+" "+r))),
+    btn("참여하기",async()=>{if(S.myRole){await loadRoom(S.roomId);set({screen:"app"});}},!!S.myRole),
+  ]);
 }
 
 function renderApp(){
-  const s=state;
-  const best=s.dates.length?s.dates.reduce((b,d)=>scoreFor(d.id)>=scoreFor(b.id)?d:b):null;
-  const invLink=s.roomId?location.origin+location.pathname+"#"+s.roomId:"";
+  const best=S.dates.length?S.dates.reduce((b,d)=>scoreFor(d.id)>=scoreFor(b.id)?d:b):null;
+  const invLink=S.roomId?location.origin+location.pathname+"#"+S.roomId:"";
+  const voterNames=Object.keys(S.votes);
 
-  const header=el("div",{style:{marginBottom:"24px"}},
-    el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}},
-      el("div",{},logo(),
-        el("h1",{style:{fontSize:"20px",fontWeight:"bold",margin:"4px 0 0",lineHeight:"1.2"}},
-          (s.roomInfo?.band_name||s.bandName)+" ",
-          el("span",{style:{color:"#7c6af7"}},s.roomInfo?.session_title||s.sessionTitle)
-        )
-      ),
-      el("button",{style:{background:"none",border:"1px solid #2a2a2a",borderRadius:"8px",padding:"6px 10px",color:"#555",cursor:"pointer",fontSize:"11px"},onClick:()=>loadRoom(s.roomId)},"↻")
-    ),
-    el("p",{style:{color:"#333",fontSize:"11px",marginTop:"6px"}},"방 코드: ",el("span",{style:{color:"#7c6af7"}},s.roomId)," · 날짜 "+s.dates.length+"개")
-  );
+  const header=div({style:{marginBottom:"24px"}},[
+    div({style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}},[
+      div({},[
+        logo(),
+        el("h1",{style:{fontSize:"20px",fontWeight:"bold",margin:"0",lineHeight:"1.2"}},[
+          (S.roomInfo?.band_name||S.bandName),
+          el("br"),
+          el("span",{style:{color:"#7c6af7"}},S.roomInfo?.session_title||S.sessionTitle),
+        ]),
+      ]),
+      el("button",{style:{background:"none",border:"1px solid #2a2a2a",borderRadius:"8px",padding:"6px 10px",color:"#555",cursor:"pointer",fontSize:"11px"},onclick:()=>loadRoom(S.roomId)},"↻"),
+    ]),
+    el("p",{style:{color:"#333",fontSize:"11px",marginTop:"6px"}},[
+      "방 코드: ",el("span",{style:{color:"#7c6af7",letterSpacing:".1em"}},S.roomId)," · 날짜 "+S.dates.length+"개",
+    ]),
+  ]);
 
-  const tabs=el("div",{className:"tabs"},
-    ...["vote","result","members"].map(t=>el("button",{className:"tab"+(s.view===t?" on":""),onClick:()=>set({view:t})},t==="vote"?"내 일정":t==="result"?"현황":"멤버"))
-  );
+  const tabs=div({class:"tabs"},["vote","result","members"].map(t=>
+    el("button",{class:"tab"+(S.view===t?" on":""),onclick:()=>set({view:t})},t==="vote"?"내 일정":t==="result"?"현황":"멤버")
+  ));
 
   let content;
-  if(s.view==="vote"){
-    if(s.submitted){
-      content=el("div",{style:{textAlign:"center",paddingTop:"40px"}},
-        el("div",{style:{fontSize:"32px",marginBottom:"12px"}},"✅"),
-        el("div",{style:{fontSize:"16px",fontWeight:"bold",marginBottom:"8px"}},"투표 완료!"),
-        el("div",{style:{fontSize:"12px",color:"#555",marginBottom:"24px"}},"현황 탭에서 결과 확인해봐"),
-        el("button",{className:"btn",style:{marginTop:"0"},onClick:()=>set({submitted:false})},"다시 수정하기")
-      );
+  if(S.view==="vote"){
+    if(S.submitted){
+      content=div({style:{textAlign:"center",paddingTop:"40px"}},[
+        div({style:{fontSize:"32px",marginBottom:"12px"}},"✅"),
+        div({style:{fontSize:"16px",fontWeight:"bold",marginBottom:"8px"}},"투표 완료!"),
+        div({style:{fontSize:"12px",color:"#555",marginBottom:"24px"}},"현황 탭에서 결과 확인해봐"),
+        btn("다시 수정하기",()=>set({submitted:false})),
+      ]);
     }else{
-      content=el("div",{},
-        el("p",{style:{fontSize:"11px",color:"#444",marginBottom:"16px"}},s.myName+"님, 각 날짜 가능 여부를 선택해줘"),
-        ...s.dates.map(d=>el("div",{className:"card",style:{borderColor:s.myVotes[d.id]==="ok"?"#4ade8033":s.myVotes[d.id]==="maybe"?"#facc1533":"#1e1e1e"}},
-          el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center"}},
-            el("div",{},el("div",{style:{fontSize:"14px",fontWeight:"bold"}},d.date),el("div",{style:{fontSize:"11px",color:"#444",marginTop:"2px"}},d.time)),
-            el("div",{style:{fontSize:"10px",padding:"3px 8px",borderRadius:"20px",background:"#1a1a1a",color:"#555"}},scoreFor(d.id)+"명 가능")
-          ),
-          el("div",{className:"status-row"},
-            ...["ok","maybe","no"].map(sv=>el("button",{className:"status-btn",
-              style:{borderColor:s.myVotes[d.id]===sv?SC[sv]:"#2a2a2a",background:s.myVotes[d.id]===sv?SC[sv]+"22":"#1a1a1a",color:s.myVotes[d.id]===sv?SC[sv]:"#444"},
-              onClick:()=>set({myVotes:{...s.myVotes,[d.id]:sv}})},SL[sv]))
-          )
-        )),
-        s.error?el("div",{className:"err"},s.error):null,
-        el("button",{className:"btn",disabled:!s.dates.every(d=>s.myVotes[d.id])||s.loading,onClick:submitVote},s.loading?"제출 중...":"제출하기")
-      );
+      content=div({},[
+        el("p",{style:{fontSize:"11px",color:"#444",marginBottom:"16px"}},S.myName+"님, 각 날짜 가능 여부를 선택해줘"),
+        ...S.dates.map(d=>div({class:"card",style:{borderColor:S.myVotes[d.id]==="ok"?"#4ade8033":S.myVotes[d.id]==="maybe"?"#facc1533":"#1e1e1e"}},[
+          div({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px"}},[
+            div({},[
+              div({style:{fontSize:"14px",fontWeight:"bold"}},d.date),
+              div({style:{fontSize:"11px",color:"#444",marginTop:"2px"}},d.time),
+            ]),
+            div({style:{fontSize:"10px",padding:"3px 8px",borderRadius:"20px",background:"#1a1a1a",color:"#555"}},scoreFor(d.id)+"명 가능"),
+          ]),
+          div({class:"status-row"},["ok","maybe","no"].map(sv=>{
+            const b=el("button",{class:"status-btn",onclick:()=>set({myVotes:{...S.myVotes,[d.id]:sv}})},SL[sv]);
+            if(S.myVotes[d.id]===sv){b.style.borderColor=SC[sv];b.style.background=SC[sv]+"22";b.style.color=SC[sv];}
+            return b;
+          })),
+        ])),
+        S.error?div({class:"err"},S.error):null,
+        btn(S.loading?"제출 중...":"제출하기",()=>{if(!S.loading&&S.dates.every(d=>S.myVotes[d.id]))submitVote();},S.dates.every(d=>S.myVotes[d.id])&&!S.loading),
+      ]);
     }
-  }else if(s.view==="result"){
-    content=el("div",{},
-      best?el("div",{style:{background:"linear-gradient(135deg,#7c6af722,#4ade8011)",border:"1px solid #7c6af733",borderRadius:"14px",padding:"18px 20px",marginBottom:"20px"}},
-        el("div",{style:{fontSize:"10px",color:"#7c6af7",letterSpacing:".3em",marginBottom:"6px"}},"BEST DATE"),
-        el("div",{style:{fontSize:"18px",fontWeight:"bold"}},best.date),
-        el("div",{style:{fontSize:"12px",color:"#666",marginTop:"2px"}},best.time+" · "+scoreFor(best.id)+"명 가능"),
-        !s.confirmed
-          ?el("button",{style:{marginTop:"14px",padding:"8px 20px",background:"#7c6af7",border:"none",borderRadius:"8px",color:"#fff",fontSize:"11px",cursor:"pointer"},onClick:()=>set({confirmed:best})},"이 날로 확정 ✓")
-          :el("div",{style:{marginTop:"12px",fontSize:"12px",color:"#4ade80"}},"✓ "+s.confirmed.date+" 합주 확정!")
-      ):null,
-      ...s.dates.map(d=>el("div",{className:"card"},
-        el("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:"12px"}},
-          el("span",{style:{fontSize:"13px",fontWeight:"bold"}},d.date),
-          el("span",{style:{fontSize:"12px",color:"#555"}},scoreFor(d.id)+"/"+Object.keys(s.votes).length+"명")
+  }else if(S.view==="result"){
+    content=div({},[
+      best?div({style:{background:"linear-gradient(135deg,#7c6af722,#4ade8011)",border:"1px solid #7c6af733",borderRadius:"14px",padding:"18px 20px",marginBottom:"20px"}},[
+        div({style:{fontSize:"10px",color:"#7c6af7",letterSpacing:".3em",marginBottom:"6px"}},"BEST DATE"),
+        div({style:{fontSize:"18px",fontWeight:"bold"}},best.date),
+        div({style:{fontSize:"12px",color:"#666",marginTop:"2px"}},best.time+" · "+scoreFor(best.id)+"명 가능"),
+        !S.confirmed
+          ?el("button",{style:{marginTop:"14px",padding:"8px 20px",background:"#7c6af7",border:"none",borderRadius:"8px",color:"#fff",fontSize:"11px",cursor:"pointer",fontFamily:"'Courier New',monospace"},onclick:()=>set({confirmed:best})},"이 날로 확정 ✓")
+          :div({style:{marginTop:"12px",fontSize:"12px",color:"#4ade80"}},"✓ "+S.confirmed.date+" 합주 확정!"),
+      ]):null,
+      ...S.dates.map(d=>div({class:"card"},[
+        div({style:{display:"flex",justifyContent:"space-between",marginBottom:"12px"}},[
+          div({},[el("span",{style:{fontSize:"13px",fontWeight:"bold"}},d.date),el("span",{style:{fontSize:"11px",color:"#444",marginLeft:"8px"}},d.time)]),
+          div({style:{fontSize:"12px",color:"#555"}},scoreFor(d.id)+"/"+voterNames.length+"명"),
+        ]),
+        div({style:{display:"flex",flexDirection:"column",gap:"7px"}},
+          voterNames.length===0
+            ?[div({style:{fontSize:"11px",color:"#333"}},"아직 투표한 멤버가 없어")]
+            :voterNames.map(name=>{
+                const v=S.votes[name]?.[d.id];
+                return div({style:{display:"flex",alignItems:"center",gap:"10px"}},[
+                  el("span",{style:{fontSize:"12px",flex:"1",color:"#aaa"}},name+(name===S.myName?" (나)":"")),
+                  el("span",{style:{fontSize:"10px",padding:"2px 8px",borderRadius:"10px",background:v?SC[v]+"22":"#1a1a1a",color:v?SC[v]:"#333"}},v?SL[v]:"미응답"),
+                ]);
+              })
         ),
-        el("div",{style:{fontSize:"11px",color:"#555",marginBottom:"6px"}},d.time),
-        ...Object.keys(s.votes).length===0
-          ?[el("div",{style:{fontSize:"11px",color:"#333"}},"아직 투표한 멤버가 없어")]
-          :Object.keys(s.votes).map(name=>{
-              const v=s.votes[name]?.[d.id];
-              return el("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"6px"}},
-                el("span",{style:{fontSize:"12px",flex:1,color:"#aaa"}},name+(name===s.myName?" (나)":"")),
-                el("span",{style:{fontSize:"10px",padding:"2px 8px",borderRadius:"10px",background:v?SC[v]+"22":"#1a1a1a",color:v?SC[v]:"#333"}},v?SL[v]:"미응답")
-              );
-            })
-      ))
-    );
+      ])),
+    ]);
   }else{
-    content=el("div",{},
-      ...Object.keys(s.votes).map(name=>el("div",{className:"card",style:{display:"flex",alignItems:"center",gap:"14px"}},
-        el("div",{style:{fontSize:"18px"}},"🎵"),
-        el("div",{style:{flex:1,fontSize:"13px",fontWeight:"bold"}},name+(name===s.myName?" (나)":"")),
-        el("div",{style:{fontSize:"9px",padding:"3px 8px",borderRadius:"10px",background:"#4ade8011",color:"#4ade80",border:"1px solid #4ade8033"}},"투표완료")
-      )),
-      el("div",{className:"card",style:{marginTop:"8px"}},
-        el("span",{className:"label"},"초대 링크"),
-        el("div",{style:{background:"#1a1a1a",borderRadius:"10px",padding:"12px",fontSize:"10px",color:"#555",marginBottom:"12px",wordBreak:"break-all"}},invLink),
-        el("button",{className:"btn",style:{marginTop:"0",background:s.inviteCopied?"#4ade8022":"#7c6af7",color:s.inviteCopied?"#4ade80":"#fff"},
-          onClick:()=>{navigator.clipboard?.writeText(invLink);set({inviteCopied:true});setTimeout(()=>set({inviteCopied:false}),2000);}},
-          s.inviteCopied?"✓ 복사됨!":"링크 복사 — 멤버에게 공유")
-      )
-    );
+    content=div({},[
+      voterNames.length===0?div({style:{fontSize:"12px",color:"#333",marginBottom:"20px"}},"아직 투표한 멤버가 없어. 링크를 공유해봐!"):null,
+      ...voterNames.map(name=>div({class:"card",style:{display:"flex",alignItems:"center",gap:"14px",borderColor:name===S.myName?"#7c6af733":"#1e1e1e"}},[
+        div({style:{width:"40px",height:"40px",borderRadius:"50%",background:name===S.myName?"#7c6af722":"#1a1a1a",border:"1px solid "+(name===S.myName?"#7c6af7":"#2a2a2a"),display:"flex",alignItems:"center",justifyContent:"center",fontSize:"18px"}},"🎵"),
+        div({style:{flex:"1",fontSize:"13px",fontWeight:"bold"}},name+(name===S.myName?" (나)":"")),
+        div({style:{fontSize:"9px",padding:"3px 8px",borderRadius:"10px",background:"#4ade8011",color:"#4ade80",border:"1px solid #4ade8033"}},"투표완료"),
+      ])),
+      div({class:"card",style:{marginTop:"8px"}},[
+        el("span",{class:"label"},"초대 링크 공유"),
+        div({style:{background:"#1a1a1a",borderRadius:"10px",padding:"12px 14px",fontSize:"10px",color:"#555",marginBottom:"12px",wordBreak:"break-all",lineHeight:"1.6"}},invLink),
+        btn(S.inviteCopied?"✓ 복사됨!":"링크 복사 — 멤버에게 공유",()=>{
+          navigator.clipboard?.writeText(invLink);
+          set({inviteCopied:true});
+          setTimeout(()=>set({inviteCopied:false}),2000);
+        }),
+      ]),
+    ]);
   }
 
-  return el("div",{},header,tabs,content,
-    el("div",{style:{marginTop:"48px",textAlign:"center",color:"#1e1e1e",fontSize:"10px",letterSpacing:".2em"}},"합간 · MRDW 무릉도원")
-  );
-}
-
-function render(){
-  const root=document.getElementById("root");
-  // 한글 입력 중에는 re-render 스킵
-  const active = document.activeElement;
-  const isComposing = active && active._composing;
-  if(isComposing) return;
-  root.innerHTML="";
-  const s=state;
-  let content;
-  if(s.screen==="landing") content=renderLanding();
-  else if(s.screen==="setup") content=renderSetup();
-  else if(s.screen==="login") content=renderLogin();
-  else if(s.screen==="app") content=renderApp();
-  else content=el("div",{},el("div",{className:"spinner"}));
-  root.appendChild(content);
+  return div({},[header,tabs,content,
+    div({style:{marginTop:"48px",textAlign:"center",color:"#1e1e1e",fontSize:"10px",letterSpacing:".2em"}},"합간 · MRDW 무릉도원"),
+  ]);
 }
 
 render();
-
-// 자동 갱신
-setInterval(()=>{ if(state.screen==="app"&&state.roomId) loadRoom(state.roomId); },15000);
+setInterval(()=>{if(S.screen==="app"&&S.roomId)loadRoom(S.roomId);},15000);
 </script>
 </body>
 </html>
