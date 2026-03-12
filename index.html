@@ -44,7 +44,7 @@
 <script>
 // ── Supabase
 const SB_URL = "https://tjjhkddtfyoyshgtlvsl.supabase.co";
-const SB_KEY = "sb_publishable_Ciw2l65MsJJdH0dx_DdHbQ_BG1F0I8P";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqamhrZGR0ZnlveXNoZ3RsdnNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyODgxNzUsImV4cCI6MjA4ODg2NDE3NX0.ivy7wL_0xBqGynZZrS4MrIkPMQT15pPGMrnu0OJUb9Q";
 async function sb(path, o={}) {
   const h = {"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json","Accept":"application/json"};
   if(o.prefer||o.method) h["Prefer"]=o.prefer||"return=representation";
