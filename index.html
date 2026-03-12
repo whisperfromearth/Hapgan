@@ -3,22 +3,21 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>합간 — 합주를 간단히</title>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/sucrase@3.35.0/dist/umd/sucrase.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #0a0a0a; color: #e8e8e8; font-family: "Courier New", monospace; }
-    input, button, select { font-family: "Courier New", monospace; }
+    body { background: #0a0a0a; color: #e8e8e8; font-family: "Courier New", monospace; -webkit-text-size-adjust: 100%; }
+    input, button { font-family: "Courier New", monospace; }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
   <div id="root"></div>
-  <script type="text/babel">
-const { useState, useRef, useEffect, useCallback } = React;
+  <script id="app-code" type="text/plain">
 
 // ── Supabase ─────────────────────────────────────────────
 const SUPABASE_URL = “https://tjjhkddtfyoyshgtlvsl.supabase.co”;
@@ -218,7 +217,7 @@ return (
 }
 
 // ── 메인 ─────────────────────────────────────────────────
-export default function Hapgan() {
+function Hapgan() {
 const [screen, setScreen] = useState(“landing”);
 const [loading, setLoading] = useState(false);
 const [error, setError] = useState(null);
@@ -697,11 +696,14 @@ return (
 );
 }
 
-```
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(React.createElement(Hapgan));
-```
-
+  </script>
+  <script>
+    const { useState, useRef, useEffect, useCallback } = React;
+    const code = document.getElementById("app-code").textContent;
+    const transformed = sucrase.transform(code, { transforms: ["jsx"] }).code;
+    eval(transformed);
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(React.createElement(Hapgan));
   </script>
 </body>
 </html>
